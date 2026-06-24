@@ -1,64 +1,10 @@
 'use client';
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AlertTriangle, Clock, ChevronRight, Zap, BookOpen, BarChart2 } from "lucide-react";
-
-type Priority = "critical" | "high" | "medium" | "low";
-type Subject = "B/B" | "C/B" | "P/S" | "C/P";
-
-interface Concept {
-  id: number;
-  name: string;
-  subject: Subject;
-  seen: number;
-  priority: Priority;
-  chapter: string;
-  section: string;
-  gap: string;
-}
-
-const concepts: Concept[] = [
-  {
-    id: 1,
-    name: "Oxidative Phosphorylation",
-    subject: "B/B",
-    seen: 5,
-    priority: "critical",
-    chapter: "Ch. 2",
-    section: "§3",
-    gap: "Struggling with electron transport chain coupling and proton gradient mechanics.",
-  },
-  {
-    id: 2,
-    name: "Osmotic Pressure",
-    subject: "C/B",
-    seen: 3,
-    priority: "high",
-    chapter: "Ch. 6",
-    section: "§1",
-    gap: "Confusing van't Hoff factor with osmolarity calculations.",
-  },
-  {
-    id: 3,
-    name: "Cognitive Dissonance",
-    subject: "P/S",
-    seen: 2,
-    priority: "medium",
-    chapter: "Ch. 11",
-    section: "§4",
-    gap: "Mixing up dissonance reduction strategies.",
-  },
-  {
-    id: 4,
-    name: "Buffer Systems",
-    subject: "C/P",
-    seen: 1,
-    priority: "low",
-    chapter: "Ch. 5",
-    section: "§2",
-    gap: "Need to review Henderson-Hasselbalch application.",
-  },
-];
+import { getConcepts } from "@/lib/db";
+import type { Concept, Priority, Subject } from "@/lib/db";
 
 const PRIORITY_META: Record<Priority, { label: string; color: string; bg: string; icon: React.ReactNode }> = {
   critical: { label: "Critical",  color: "#ef4444", bg: "rgba(239,68,68,0.12)",   icon: <AlertTriangle size={13} /> },
@@ -113,10 +59,12 @@ function ConceptCard({ concept }: { concept: Concept }) {
             </span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", flexWrap: "wrap" }}>
-            <span className="freq-badge">{freqLabel(concept.seen)}</span>
-            <span style={{ fontSize: "0.75rem", color: "#64748b" }}>
-              Kaplan {concept.chapter} {concept.section}
-            </span>
+            <span className="freq-badge">{freqLabel(concept.seen_count)}</span>
+            {(concept.kaplan_chapter || concept.kaplan_section) && (
+              <span style={{ fontSize: "0.75rem", color: "#64748b" }}>
+                Kaplan {concept.kaplan_chapter} {concept.kaplan_section}
+              </span>
+            )}
           </div>
         </div>
 
@@ -143,22 +91,24 @@ function ConceptCard({ concept }: { concept: Concept }) {
       </div>
 
       {/* Gap analysis */}
-      <div
-        style={{
-          background: "rgba(255,255,255,0.04)",
-          borderRadius: "0.4rem",
-          padding: "0.55rem 0.75rem",
-          fontSize: "0.82rem",
-          color: "#94a3b8",
-          lineHeight: 1.5,
-          borderLeft: `3px solid ${pm.color}66`,
-        }}
-      >
-        <span style={{ color: "#64748b", fontWeight: 600, fontSize: "0.72rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>
-          Gap · {" "}
-        </span>
-        {concept.gap}
-      </div>
+      {concept.gap_analysis && (
+        <div
+          style={{
+            background: "rgba(255,255,255,0.04)",
+            borderRadius: "0.4rem",
+            padding: "0.55rem 0.75rem",
+            fontSize: "0.82rem",
+            color: "#94a3b8",
+            lineHeight: 1.5,
+            borderLeft: `3px solid ${pm.color}66`,
+          }}
+        >
+          <span style={{ color: "#64748b", fontWeight: 600, fontSize: "0.72rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+            Gap ·{" "}
+          </span>
+          {concept.gap_analysis}
+        </div>
+      )}
 
       {/* Study Now button */}
       <div style={{ display: "flex", justifyContent: "flex-end" }}>
@@ -187,16 +137,19 @@ function ConceptCard({ concept }: { concept: Concept }) {
   );
 }
 
-const sessionQueue = [
-  { time: "0–15 min",  concept: "Oxidative Phosphorylation", mode: "Active Recall + Diagram" },
-  { time: "15–30 min", concept: "Osmotic Pressure",          mode: "Practice Problems" },
-  { time: "30–40 min", concept: "Cognitive Dissonance",      mode: "Mnemonics + Examples" },
-  { time: "40–45 min", concept: "Buffer Systems",            mode: "Quick Review" },
-];
-
 export default function Dashboard() {
+  const [concepts, setConcepts] = useState<Concept[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getConcepts()
+      .then(data => setConcepts(data))
+      .catch(err => console.error("Failed to load concepts:", err))
+      .finally(() => setLoading(false));
+  }, []);
+
   const critical = concepts.filter(c => c.priority === "critical").length;
-  const totalSeen = concepts.reduce((a, c) => a + c.seen, 0);
+  const totalSeen = concepts.reduce((a, c) => a + c.seen_count, 0);
 
   return (
     <div style={{ padding: "2rem 2.5rem", maxWidth: 1000, margin: "0 auto" }}>
@@ -270,71 +223,98 @@ export default function Dashboard() {
           </span>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}>
-          {concepts.map(concept => (
-            <ConceptCard key={concept.id} concept={concept} />
-          ))}
+          {loading ? (
+            <div style={{ color: "#64748b", fontSize: "0.875rem", padding: "1rem 0" }}>Loading...</div>
+          ) : concepts.length === 0 ? (
+            <div
+              style={{
+                background: "#1e2433",
+                border: "1px solid #2d3748",
+                borderRadius: "0.75rem",
+                padding: "2rem",
+                textAlign: "center",
+                color: "#64748b",
+                fontSize: "0.875rem",
+              }}
+            >
+              No concepts tracked yet. Add your first missed question to get started.
+            </div>
+          ) : (
+            concepts.map(concept => (
+              <ConceptCard key={concept.id} concept={concept} />
+            ))
+          )}
         </div>
       </section>
 
       {/* Session Planner */}
-      <section>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
-          <h2 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 700, color: "#e2e8f0" }}>
-            Session Planner
-          </h2>
-          <span style={{ fontSize: "0.78rem", color: "#64748b" }}>Next session · 45 min</span>
-        </div>
-        <div
-          style={{
-            background: "#1e2433",
-            border: "1px solid #2d3748",
-            borderRadius: "0.75rem",
-            overflow: "hidden",
-          }}
-        >
-          {sessionQueue.map((item, i) => (
-            <div
-              key={i}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "1rem",
-                padding: "0.85rem 1.25rem",
-                borderBottom: i < sessionQueue.length - 1 ? "1px solid #2d3748" : "none",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "0.72rem",
-                  color: "#64748b",
-                  fontWeight: 600,
-                  minWidth: 80,
-                  fontFamily: "ui-monospace, monospace",
-                }}
-              >
-                {item.time}
-              </span>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 600, fontSize: "0.875rem", color: "#e2e8f0" }}>{item.concept}</div>
-                <div style={{ fontSize: "0.75rem", color: "#64748b", marginTop: 2 }}>{item.mode}</div>
-              </div>
-              <span
-                style={{
-                  fontSize: "0.7rem",
-                  background: "rgba(99,102,241,0.15)",
-                  color: "#818cf8",
-                  border: "1px solid rgba(99,102,241,0.3)",
-                  borderRadius: 999,
-                  padding: "2px 9px",
-                  fontWeight: 600,
-                }}
-              >
-                Queued
-              </span>
-            </div>
-          ))}
-        </div>
-      </section>
+      {concepts.length > 0 && (
+        <section>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
+            <h2 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 700, color: "#e2e8f0" }}>
+              Session Planner
+            </h2>
+            <span style={{ fontSize: "0.78rem", color: "#64748b" }}>Next session · 45 min</span>
+          </div>
+          <div
+            style={{
+              background: "#1e2433",
+              border: "1px solid #2d3748",
+              borderRadius: "0.75rem",
+              overflow: "hidden",
+            }}
+          >
+            {concepts.slice(0, 4).map((concept, i, arr) => {
+              const mode =
+                concept.seen_count >= 5 ? "Active Recall + Diagram" :
+                concept.seen_count >= 3 ? "Practice Problems" :
+                concept.seen_count >= 2 ? "Mnemonics + Examples" : "Quick Review";
+              const timeSlots = ["0–15 min", "15–30 min", "30–40 min", "40–45 min"];
+              return (
+                <div
+                  key={concept.id}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "1rem",
+                    padding: "0.85rem 1.25rem",
+                    borderBottom: i < arr.length - 1 ? "1px solid #2d3748" : "none",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: "0.72rem",
+                      color: "#64748b",
+                      fontWeight: 600,
+                      minWidth: 80,
+                      fontFamily: "ui-monospace, monospace",
+                    }}
+                  >
+                    {timeSlots[i] ?? `+${i * 10} min`}
+                  </span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 600, fontSize: "0.875rem", color: "#e2e8f0" }}>{concept.name}</div>
+                    <div style={{ fontSize: "0.75rem", color: "#64748b", marginTop: 2 }}>{mode}</div>
+                  </div>
+                  <span
+                    style={{
+                      fontSize: "0.7rem",
+                      background: "rgba(99,102,241,0.15)",
+                      color: "#818cf8",
+                      border: "1px solid rgba(99,102,241,0.3)",
+                      borderRadius: 999,
+                      padding: "2px 9px",
+                      fontWeight: 600,
+                    }}
+                  >
+                    Queued
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

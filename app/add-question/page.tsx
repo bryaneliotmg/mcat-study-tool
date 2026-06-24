@@ -2,9 +2,11 @@
 
 import { useState, useRef } from "react";
 import { Upload, Type, Clipboard, Sparkles, CheckCircle } from "lucide-react";
+import { createQuestion } from "@/lib/db";
+import type { Subject as DBSubject } from "@/lib/db";
 
 type Tab = "type" | "photo" | "paste";
-type Subject = "B/B" | "C/B" | "P/S" | "C/P" | "";
+type Subject = DBSubject | "";
 
 const SUBJECTS: Subject[] = ["B/B", "C/B", "P/S", "C/P"];
 
@@ -26,19 +28,42 @@ export default function AddQuestionPage() {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [showToast, setShowToast] = useState(false);
   const [extracting, setExtracting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  function handleSubmit() {
-    // Reset form
-    setQuestion("");
-    setSubject("");
-    setNotes("");
-    setPasteText("");
-    setExtractedConcept("");
-    setUploadedFile(null);
-    setActiveTab("type");
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
+  async function handleSubmit() {
+    const rawText =
+      activeTab === "type" ? question.trim() :
+      activeTab === "paste" ? pasteText.trim() :
+      uploadedFile?.name ?? "";
+
+    setSubmitError("");
+    setSubmitting(true);
+    try {
+      await createQuestion({
+        raw_text: rawText,
+        input_method: activeTab === "photo" ? "photo" : activeTab === "paste" ? "paste" : "type",
+        subject: subject !== "" ? (subject as DBSubject) : null,
+        notes: notes.trim() || null,
+        concept_id: null,
+      });
+      // Reset form
+      setQuestion("");
+      setSubject("");
+      setNotes("");
+      setPasteText("");
+      setExtractedConcept("");
+      setUploadedFile(null);
+      setActiveTab("type");
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+    } catch (err) {
+      setSubmitError("Failed to save question. Please try again.");
+      console.error(err);
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   function handleExtract() {
@@ -296,11 +321,12 @@ export default function AddQuestionPage() {
 
           {/* Submit */}
           <div style={{ marginTop: "1.5rem", borderTop: "1px solid #2d3748", paddingTop: "1.25rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <span style={{ fontSize: "0.78rem", color: "#4a5568" }}>
-              Will be added to your study queue and ranked by priority.
+            <span style={{ fontSize: "0.78rem", color: submitError ? "#ef4444" : "#4a5568" }}>
+              {submitError || "Will be added to your study queue and ranked by priority."}
             </span>
             <button
               onClick={handleSubmit}
+              disabled={submitting}
               style={{
                 background: "linear-gradient(135deg, #6366f1, #4f46e5)",
                 color: "#fff",
@@ -319,7 +345,7 @@ export default function AddQuestionPage() {
               onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
             >
               <Sparkles size={15} />
-              Analyze &amp; Add to Queue
+              {submitting ? "Saving..." : "Analyze & Add to Queue"}
             </button>
           </div>
         </div>

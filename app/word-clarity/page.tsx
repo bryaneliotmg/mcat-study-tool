@@ -1,7 +1,9 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, CheckCircle, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { createWordClaritySession, markWordCleared, getWordClaritySessions } from "@/lib/db";
+import type { WordClaritySession } from "@/lib/db";
 
 interface ClearedWord {
   word: string;
@@ -52,8 +54,24 @@ export default function WordClarityPage() {
   const [cleared, setCleared] = useState<ClearedWord[]>([]);
   const [isCleared, setIsCleared] = useState(false);
   const [showCleared, setShowCleared] = useState(true);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
 
-  function handleSearch() {
+  useEffect(() => {
+    getWordClaritySessions()
+      .then(sessions => {
+        const clearedSessions = sessions.filter(s => s.is_cleared);
+        setCleared(clearedSessions.map(s => ({
+          word: s.word,
+          clearedAt: s.cleared_at
+            ? new Date(s.cleared_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })
+            : "",
+          context: s.context ?? "",
+        })));
+      })
+      .catch(err => console.error("Failed to load word clarity sessions:", err));
+  }, []);
+
+  async function handleSearch() {
     const word = inputWord.trim();
     if (!word) return;
     setActiveWord(word);
@@ -63,6 +81,21 @@ export default function WordClarityPage() {
     setDefSentences({});
     setIsCleared(false);
     setContext("");
+    setActiveSessionId(null);
+
+    try {
+      const session = await createWordClaritySession({
+        word,
+        context: null,
+        definitions: defs.map(d => ({ meaning: d.text, partOfSpeech: d.sense })),
+        sentences: null,
+        is_cleared: false,
+        cleared_at: null,
+      });
+      setActiveSessionId(session.id);
+    } catch (err) {
+      console.error("Failed to create word clarity session:", err);
+    }
   }
 
   function handleSentenceCountChange(n: number) {
@@ -79,7 +112,7 @@ export default function WordClarityPage() {
     setDefSentences(prev => ({ ...prev, [i]: val }));
   }
 
-  function handleMarkCleared() {
+  async function handleMarkCleared() {
     if (!activeWord) return;
     const now = new Date();
     const timestamp = now.toLocaleString("en-US", {
@@ -87,6 +120,14 @@ export default function WordClarityPage() {
     });
     setCleared(prev => [{ word: activeWord, clearedAt: timestamp, context }, ...prev]);
     setIsCleared(true);
+
+    if (activeSessionId) {
+      try {
+        await markWordCleared(activeSessionId, sentences.filter(Boolean));
+      } catch (err) {
+        console.error("Failed to mark word cleared:", err);
+      }
+    }
   }
 
   return (

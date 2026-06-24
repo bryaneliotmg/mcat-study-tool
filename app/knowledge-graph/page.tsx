@@ -2,33 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import type cytoscape from "cytoscape";
-
-type Subject = "B/B" | "C/B" | "P/S" | "C/P";
-type Priority = "critical" | "high" | "medium" | "low";
-
-interface Concept {
-  id: string;
-  name: string;
-  subject: Subject;
-  seen: number;
-  priority: Priority;
-  chapter: string;
-  section: string;
-  gap: string;
-}
-
-const concepts: Concept[] = [
-  { id: "1", name: "Oxidative Phosphorylation", subject: "B/B", seen: 5, priority: "critical", chapter: "Ch. 2", section: "§3", gap: "Struggling with electron transport chain coupling and proton gradient mechanics." },
-  { id: "2", name: "Osmotic Pressure",          subject: "C/B", seen: 3, priority: "high",     chapter: "Ch. 6", section: "§1", gap: "Confusing van't Hoff factor with osmolarity calculations." },
-  { id: "3", name: "Cognitive Dissonance",      subject: "P/S", seen: 2, priority: "medium",   chapter: "Ch. 11",section: "§4", gap: "Mixing up dissonance reduction strategies." },
-  { id: "4", name: "Buffer Systems",            subject: "C/P", seen: 1, priority: "low",      chapter: "Ch. 5", section: "§2", gap: "Need to review Henderson-Hasselbalch application." },
-];
-
-const edges = [
-  { source: "1", target: "4", label: "pH regulation" },
-  { source: "2", target: "4", label: "solute concentration" },
-  { source: "4", target: "2", label: "osmolarity link" },
-];
+import { getConcepts, getConceptRelationships } from "@/lib/db";
+import type { Concept, Subject, Priority } from "@/lib/db";
 
 const SUBJECT_COLORS: Record<Subject, string> = {
   "B/B": "#06b6d4",
@@ -52,6 +27,21 @@ export default function KnowledgeGraphPage() {
   const [selected, setSelected] = useState<Concept | null>(null);
   const [enabledSubjects, setEnabledSubjects] = useState<Set<Subject>>(new Set(ALL_SUBJECTS));
   const [showMastered, setShowMastered] = useState(true);
+  const [concepts, setConcepts] = useState<Concept[]>([]);
+  const [edges, setEdges] = useState<{ source: string; target: string; label: string }[]>([]);
+
+  useEffect(() => {
+    Promise.all([getConcepts(), getConceptRelationships()])
+      .then(([c, r]) => {
+        setConcepts(c);
+        setEdges(r.map(rel => ({
+          source: rel.source_concept_id,
+          target: rel.target_concept_id,
+          label: rel.relationship_label ?? "",
+        })));
+      })
+      .catch(err => console.error("Failed to load graph data:", err));
+  }, []);
 
   useEffect(() => {
     let cy: cytoscape.Core | null = null;
@@ -75,7 +65,7 @@ export default function KnowledgeGraphPage() {
               id: c.id,
               label: c.name,
               subject: c.subject,
-              seen: c.seen,
+              seen: c.seen_count,
               priority: c.priority,
             },
           })),
@@ -170,7 +160,7 @@ export default function KnowledgeGraphPage() {
       cy?.destroy();
       cyInstance.current = null;
     };
-  }, [enabledSubjects, showMastered]);
+  }, [enabledSubjects, showMastered, concepts, edges]);
 
   function toggleSubject(s: Subject) {
     setEnabledSubjects(prev => {
@@ -351,16 +341,20 @@ export default function KnowledgeGraphPage() {
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}>
-            <Detail label="Kaplan Reference" value={`${selected.chapter} ${selected.section}`} />
-            <Detail label="Exposures" value={`${selected.seen}×`} />
-            <div>
-              <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "0.35rem" }}>
-                Gap Analysis
+            {(selected.kaplan_chapter || selected.kaplan_section) && (
+              <Detail label="Kaplan Reference" value={`${selected.kaplan_chapter ?? ""} ${selected.kaplan_section ?? ""}`.trim()} />
+            )}
+            <Detail label="Exposures" value={`${selected.seen_count}×`} />
+            {selected.gap_analysis && (
+              <div>
+                <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "0.35rem" }}>
+                  Gap Analysis
+                </div>
+                <p style={{ margin: 0, fontSize: "0.82rem", color: "#94a3b8", lineHeight: 1.6 }}>
+                  {selected.gap_analysis}
+                </p>
               </div>
-              <p style={{ margin: 0, fontSize: "0.82rem", color: "#94a3b8", lineHeight: 1.6 }}>
-                {selected.gap}
-              </p>
-            </div>
+            )}
           </div>
 
           <button
