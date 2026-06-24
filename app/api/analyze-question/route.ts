@@ -13,10 +13,44 @@ export async function POST(request: Request) {
   try {
     const { raw_text, subject, notes } = await request.json();
 
+    // Fetch relevant Kaplan chapters for this section
+    const sectionToBooks: Record<string, string[]> = {
+      'B/B': ['biology', 'biochemistry'],
+      'C/P': ['gen_chem', 'org_chem', 'physics', 'biochemistry'],
+      'P/S': ['behavioral'],
+      'C/B': ['biology', 'biochemistry'],
+    };
+    const relevantBooks = sectionToBooks[subject] ?? [];
+
+    let kaplanRef = '';
+    if (relevantBooks.length > 0) {
+      const { data: chapters } = await supabase
+        .from('kaplan_chapters')
+        .select('book_title, chapter_number, chapter_title, sections')
+        .in('book', relevantBooks)
+        .order('book')
+        .order('chapter_number');
+
+      if (chapters && chapters.length > 0) {
+        kaplanRef = '\n\nKAPLAN REFERENCE BOOKS FOR THIS SECTION:\n';
+        let currentBook = '';
+        for (const ch of chapters) {
+          if (ch.book_title !== currentBook) {
+            currentBook = ch.book_title;
+            kaplanRef += `\n${currentBook}:\n`;
+          }
+          const secs = Array.isArray(ch.sections)
+            ? ch.sections.map((s: [string, string]) => `${s[0]} ${s[1]}`).join(', ')
+            : '';
+          kaplanRef += `  Ch.${ch.chapter_number}: ${ch.chapter_title}${secs ? ` (${secs.slice(0, 80)})` : ''}\n`;
+        }
+      }
+    }
+
     const response = await client.messages.create({
       model: 'claude-sonnet-4-6',
       max_tokens: 800,
-      system: 'You are an MCAT content expert with deep knowledge of the AAMC content outline.',
+      system: 'You are an MCAT content expert with deep knowledge of both the AAMC content outline and the Kaplan MCAT review book series.',
       messages: [
         {
           role: 'user',
@@ -25,14 +59,16 @@ export async function POST(request: Request) {
 QUESTION TEXT: ${raw_text}
 SECTION: ${subject}
 STUDENT NOTES: ${notes || 'none'}
+${kaplanRef}
 
-Analyze this question and output ONLY this JSON:
+Analyze this question and output ONLY this JSON. For kaplan_book and kaplan_chapter, use EXACTLY the book title and chapter number from the reference list above that best matches the concept tested:
 {
   "concept_name": "The specific concept being tested (concise, 2-6 words)",
   "aamc_category": "The AAMC category code (e.g. '1A', '3B', '5D')",
   "aamc_category_name": "Full category name",
-  "kaplan_chapter": "Estimated Kaplan chapter (e.g. 'Ch. 4')",
-  "kaplan_section": "Estimated section (e.g. '§2')",
+  "kaplan_book": "Exact book title from the reference list",
+  "kaplan_chapter": "Ch.N: Chapter Title",
+  "kaplan_section": "N.N Section title (most relevant subsection)",
   "gap_analysis": "2-3 sentences explaining exactly what knowledge or reasoning gap this question exposes and what she needs to strengthen",
   "priority": "critical|high|medium|low",
   "difficulty": 3
@@ -78,7 +114,7 @@ Analyze this question and output ONLY this JSON:
           subject,
           seen_count: 1,
           priority: analysis.priority,
-          kaplan_chapter: analysis.kaplan_chapter,
+          kaplan_chapter: `${analysis.kaplan_book ? analysis.kaplan_book + ' · ' : ''}${analysis.kaplan_chapter ?? ''}`,
           kaplan_section: analysis.kaplan_section,
           gap_analysis: analysis.gap_analysis,
           is_mastered: false,
