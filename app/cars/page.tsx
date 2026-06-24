@@ -637,34 +637,52 @@ export default function CARSPage() {
           </div>
 
           {/* RIGHT — questions */}
-          <div style={{ width: 420, flexShrink: 0, overflowY: 'auto', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem', background: '#0a0e17' }}>
-            {qs.map((q, i) => (
-              <div key={i} style={{ border: '1px solid #1e2433', borderRadius: '0.65rem', overflow: 'hidden' }}>
-                <div style={{ padding: '0.55rem 1rem', borderBottom: '1px solid #1a1f2e', display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#0f1117' }}>
-                  <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#6366f1' }}>Q{i + 1}</span>
-                  <span style={{ fontSize: '0.65rem', color: '#334155', fontWeight: 600 }}>{TYPE_LABELS[q.type] ?? q.type}</span>
-                </div>
-                <div style={{ padding: '0.85rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                  <p style={{ margin: 0, fontSize: '0.845rem', color: '#e2e8f0', fontWeight: 600, lineHeight: 1.6 }}>{q.stem}</p>
-                  <div style={{ display: 'flex', gap: '0.5rem', padding: '0.55rem 0.8rem', background: 'rgba(34,197,94,0.07)', border: '1px solid rgba(34,197,94,0.25)', borderRadius: '0.4rem', alignItems: 'flex-start' }}>
-                    <CheckCircle size={13} color="#22c55e" style={{ flexShrink: 0, marginTop: 2 }} />
-                    <div>
-                      <div style={{ fontSize: '0.6rem', fontWeight: 700, color: '#22c55e', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.15rem' }}>Correct</div>
-                      <div style={{ fontSize: '0.8rem', color: '#e2e8f0', lineHeight: 1.5 }}>{q.correct}</div>
+          <div style={{ width: 460, flexShrink: 0, overflowY: 'auto', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1.25rem', background: '#0a0e17' }}>
+            {qs.map((q, i) => {
+              // Assign stable A/B/C/D: correct=A, wrong_a=B, wrong_b=C, wrong_c=D
+              const options: { label: string; text: string; correct: boolean }[] = [
+                { label: 'A', text: q.correct, correct: true },
+                { label: 'B', text: q.wrong_a, correct: false },
+                { label: 'C', text: q.wrong_b, correct: false },
+                { label: 'D', text: q.wrong_c, correct: false },
+              ];
+              return (
+                <div key={i} style={{ border: '1px solid #1e2433', borderRadius: '0.65rem', overflow: 'hidden' }}>
+                  <div style={{ padding: '0.55rem 1rem', borderBottom: '1px solid #1a1f2e', display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#0f1117' }}>
+                    <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#6366f1' }}>Q{i + 1}</span>
+                    <span style={{ fontSize: '0.65rem', color: '#334155', fontWeight: 600 }}>{TYPE_LABELS[q.type] ?? q.type}</span>
+                  </div>
+                  <div style={{ padding: '0.85rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+                    {/* Full question stem */}
+                    <p style={{ margin: 0, fontSize: '0.845rem', color: '#e2e8f0', fontWeight: 600, lineHeight: 1.65 }}>{q.stem}</p>
+
+                    {/* All 4 options */}
+                    {options.map(opt => (
+                      <div key={opt.label} style={{
+                        display: 'flex', gap: '0.6rem', padding: '0.55rem 0.85rem',
+                        background: opt.correct ? 'rgba(34,197,94,0.07)' : 'rgba(239,68,68,0.04)',
+                        border: `1px solid ${opt.correct ? 'rgba(34,197,94,0.3)' : 'rgba(239,68,68,0.15)'}`,
+                        borderRadius: '0.45rem', alignItems: 'flex-start',
+                      }}>
+                        <span style={{ fontWeight: 800, fontSize: '0.78rem', flexShrink: 0, color: opt.correct ? '#22c55e' : '#ef4444', minWidth: 16 }}>{opt.label}.</span>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', flex: 1 }}>
+                          <span style={{ fontSize: '0.8rem', color: opt.correct ? '#e2e8f0' : '#64748b', lineHeight: 1.5 }}>{opt.text}</span>
+                          <span style={{ fontSize: '0.68rem', color: opt.correct ? '#22c55e' : '#ef444499', fontWeight: 600 }}>
+                            {opt.correct ? '✓ Correct answer' : '✗ Incorrect'}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+
+                    {/* Explanation */}
+                    <div style={{ marginTop: '0.2rem', padding: '0.65rem 0.9rem', background: '#0f1117', borderRadius: '0.45rem', borderLeft: '3px solid #6366f133' }}>
+                      <div style={{ fontSize: '0.6rem', fontWeight: 700, color: '#6366f1', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.3rem' }}>Explanation</div>
+                      <div style={{ fontSize: '0.77rem', color: '#94a3b8', lineHeight: 1.7 }}>{q.explanation}</div>
                     </div>
                   </div>
-                  {([q.wrong_a, q.wrong_b, q.wrong_c]).map((text, j) => (
-                    <div key={j} style={{ display: 'flex', gap: '0.5rem', padding: '0.45rem 0.8rem', background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.12)', borderRadius: '0.4rem', alignItems: 'flex-start' }}>
-                      <XCircle size={12} color="#ef4444" style={{ flexShrink: 0, marginTop: 2 }} />
-                      <div style={{ fontSize: '0.77rem', color: '#64748b', lineHeight: 1.5 }}>{text}</div>
-                    </div>
-                  ))}
-                  <div style={{ fontSize: '0.75rem', color: '#94a3b8', lineHeight: 1.65, padding: '0.55rem 0.8rem', background: '#0f1117', borderRadius: '0.4rem', borderLeft: '3px solid #22c55e33' }}>
-                    {q.explanation}
-                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
             <button onClick={() => setPhase('select')} style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'transparent', border: '1px solid #1e2433', borderRadius: '0.4rem', padding: '0.45rem 0.85rem', color: '#4a5568', fontSize: '0.78rem', cursor: 'pointer' }}>
               <RotateCcw size={12} /> Back to CARS
             </button>
