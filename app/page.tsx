@@ -1,137 +1,64 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
-import { AlertTriangle, Clock, ChevronRight, Zap, BookOpen, BarChart2 } from "lucide-react";
+import { AlertTriangle, Clock, ChevronRight, Zap, BookOpen, BarChart2, Network } from "lucide-react";
 import { getConcepts } from "@/lib/db";
 import type { Concept, Priority, Subject } from "@/lib/db";
 
+const MiniGraph = dynamic(() => import("./components/MiniGraph"), { ssr: false });
+
 const PRIORITY_META: Record<Priority, { label: string; color: string; bg: string; icon: React.ReactNode }> = {
-  critical: { label: "Critical",  color: "#ef4444", bg: "rgba(239,68,68,0.12)",   icon: <AlertTriangle size={13} /> },
-  high:     { label: "High",      color: "#f97316", bg: "rgba(249,115,22,0.12)",  icon: <Zap size={13} /> },
-  medium:   { label: "Medium",    color: "#eab308", bg: "rgba(234,179,8,0.12)",   icon: <Clock size={13} /> },
-  low:      { label: "Mastered",  color: "#22c55e", bg: "rgba(34,197,94,0.12)",   icon: <BookOpen size={13} /> },
+  critical: { label: "Critical", color: "#ef4444", bg: "rgba(239,68,68,0.1)",  icon: <AlertTriangle size={12} /> },
+  high:     { label: "High",     color: "#f97316", bg: "rgba(249,115,22,0.1)", icon: <Zap size={12} /> },
+  medium:   { label: "Medium",   color: "#eab308", bg: "rgba(234,179,8,0.1)",  icon: <Clock size={12} /> },
+  low:      { label: "Low",      color: "#22c55e", bg: "rgba(34,197,94,0.1)",  icon: <BookOpen size={12} /> },
 };
 
-const SUBJECT_META: Record<Subject, { badgeClass: string; color: string }> = {
-  "B/B": { badgeClass: "badge-bb", color: "#22d3ee" },
-  "C/B": { badgeClass: "badge-cb", color: "#818cf8" },
-  "P/S": { badgeClass: "badge-ps", color: "#a78bfa" },
-  "C/P": { badgeClass: "badge-cp", color: "#2dd4bf" },
+const SUBJECT_META: Record<Subject, { color: string }> = {
+  "B/B": { color: "#06b6d4" },
+  "C/B": { color: "#6366f1" },
+  "P/S": { color: "#8b5cf6" },
+  "C/P": { color: "#14b8a6" },
 };
 
-function freqLabel(seen: number): string {
-  if (seen >= 5) return `Seen ${seen}x · Dedicated Review`;
-  if (seen >= 3) return `Seen ${seen}x · Deep Review`;
-  return `Seen ${seen}x · Quick Review`;
+function freqLabel(seen: number) {
+  if (seen >= 5) return `${seen}× · Dedicated`;
+  if (seen >= 3) return `${seen}× · Deep Review`;
+  return `${seen}× · Quick`;
 }
 
-function ConceptCard({ concept }: { concept: Concept }) {
+function ConceptRow({ concept }: { concept: Concept }) {
   const pm = PRIORITY_META[concept.priority];
   const sm = SUBJECT_META[concept.subject];
-
   return (
-    <div
-      className={`priority-${concept.priority}`}
-      style={{
-        background: "#1e2433",
-        border: "1px solid #2d3748",
-        borderRadius: "0.75rem",
-        padding: "1.1rem 1.25rem",
-        display: "flex",
-        flexDirection: "column",
-        gap: "0.65rem",
-        transition: "box-shadow 0.15s",
-      }}
-      onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.4)")}
-      onMouseLeave={e => (e.currentTarget.style.boxShadow = "none")}
-    >
-      {/* Top row */}
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "0.75rem" }}>
-        <div style={{ flex: 1 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.3rem", flexWrap: "wrap" }}>
-            <span style={{ fontWeight: 700, fontSize: "1rem", color: "#e2e8f0" }}>{concept.name}</span>
-            <span
-              className={sm.badgeClass}
-              style={{ fontSize: "0.72rem", fontWeight: 700, padding: "2px 8px", borderRadius: 999, letterSpacing: "0.03em" }}
-            >
-              {concept.subject}
-            </span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", flexWrap: "wrap" }}>
-            <span className="freq-badge">{freqLabel(concept.seen_count)}</span>
-            {(concept.kaplan_chapter || concept.kaplan_section) && (
-              <span style={{ fontSize: "0.75rem", color: "#64748b" }}>
-                Kaplan {concept.kaplan_chapter} {concept.kaplan_section}
-              </span>
-            )}
-          </div>
-        </div>
+    <div style={{
+      display: "flex", alignItems: "flex-start", gap: "0.75rem",
+      padding: "0.85rem 0", borderBottom: "1px solid #151a26",
+    }}>
+      {/* Priority dot */}
+      <div style={{ width: 7, height: 7, borderRadius: "50%", background: pm.color, flexShrink: 0, marginTop: 6 }} />
 
-        {/* Priority pill */}
-        <span
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "0.3rem",
-            background: pm.bg,
-            color: pm.color,
-            border: `1px solid ${pm.color}44`,
-            borderRadius: 999,
-            padding: "3px 10px",
-            fontSize: "0.72rem",
-            fontWeight: 700,
-            whiteSpace: "nowrap",
-            flexShrink: 0,
-          }}
-        >
-          {pm.icon}
-          {pm.label}
-        </span>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.2rem" }}>
+          <span style={{ fontWeight: 700, fontSize: "0.875rem", color: "#e2e8f0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {concept.name}
+          </span>
+          <span style={{ fontSize: "0.68rem", fontWeight: 700, color: sm.color, flexShrink: 0 }}>{concept.subject}</span>
+        </div>
+        {concept.gap_analysis && (
+          <p style={{ margin: 0, fontSize: "0.75rem", color: "#4a5568", lineHeight: 1.4, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
+            {concept.gap_analysis}
+          </p>
+        )}
       </div>
 
-      {/* Gap analysis */}
-      {concept.gap_analysis && (
-        <div
-          style={{
-            background: "rgba(255,255,255,0.04)",
-            borderRadius: "0.4rem",
-            padding: "0.55rem 0.75rem",
-            fontSize: "0.82rem",
-            color: "#94a3b8",
-            lineHeight: 1.5,
-            borderLeft: `3px solid ${pm.color}66`,
-          }}
-        >
-          <span style={{ color: "#64748b", fontWeight: 600, fontSize: "0.72rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>
-            Gap ·{" "}
-          </span>
-          {concept.gap_analysis}
-        </div>
-      )}
-
-      {/* Study Now button */}
-      <div style={{ display: "flex", justifyContent: "flex-end" }}>
-        <button
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "0.35rem",
-            background: pm.color,
-            color: "#fff",
-            border: "none",
-            borderRadius: "0.45rem",
-            padding: "0.4rem 1rem",
-            fontSize: "0.8rem",
-            fontWeight: 700,
-            cursor: "pointer",
-            transition: "opacity 0.15s",
-          }}
-          onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
-          onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
-        >
-          Study Now <ChevronRight size={14} />
-        </button>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.3rem", flexShrink: 0 }}>
+        <span style={{ fontSize: "0.65rem", fontWeight: 700, padding: "2px 7px", borderRadius: 999, background: pm.bg, color: pm.color, display: "flex", alignItems: "center", gap: "0.25rem" }}>
+          {pm.icon}{pm.label}
+        </span>
+        <span style={{ fontSize: "0.65rem", color: "#334155", fontWeight: 500 }}>{freqLabel(concept.seen_count)}</span>
       </div>
     </div>
   );
@@ -140,11 +67,12 @@ function ConceptCard({ concept }: { concept: Concept }) {
 export default function Dashboard() {
   const [concepts, setConcepts] = useState<Concept[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedNode, setSelectedNode] = useState<Concept | null>(null);
 
   useEffect(() => {
     getConcepts()
-      .then(data => setConcepts(data))
-      .catch(err => console.error("Failed to load concepts:", err))
+      .then(setConcepts)
+      .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
 
@@ -152,169 +80,108 @@ export default function Dashboard() {
   const totalSeen = concepts.reduce((a, c) => a + c.seen_count, 0);
 
   return (
-    <div style={{ padding: "2rem 2.5rem", maxWidth: 1000, margin: "0 auto" }}>
+    <div style={{ padding: "1.75rem 2rem", height: "100%", display: "flex", flexDirection: "column", gap: "1.25rem", boxSizing: "border-box" }}>
 
-      {/* Page header */}
-      <div style={{ marginBottom: "2rem" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem" }}>
-          <div>
-            <h1 style={{ margin: 0, fontSize: "1.6rem", fontWeight: 800, color: "#e2e8f0", letterSpacing: "-0.02em" }}>
-              Study Dashboard
-            </h1>
-            <p style={{ margin: "0.3rem 0 0", color: "#64748b", fontSize: "0.875rem" }}>
-              {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
-            </p>
-          </div>
-          <Link
-            href="/add-question"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "0.4rem",
-              background: "#3b82f6",
-              color: "#fff",
-              textDecoration: "none",
-              borderRadius: "0.5rem",
-              padding: "0.5rem 1.1rem",
-              fontSize: "0.875rem",
-              fontWeight: 600,
-            }}
-          >
-            + Add Question
-          </Link>
+      {/* ── Header ── */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div>
+          <h1 style={{ margin: 0, fontSize: "1.25rem", fontWeight: 700, color: "#e2e8f0", letterSpacing: "-0.01em" }}>
+            {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+          </h1>
+          <p style={{ margin: "0.2rem 0 0", color: "#334155", fontSize: "0.78rem" }}>Study Dashboard</p>
         </div>
-
-        {/* Stats row */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "0.75rem", marginTop: "1.5rem" }}>
-          {[
-            { label: "Concepts Tracked", value: concepts.length, icon: <BookOpen size={18} />, color: "#6366f1" },
-            { label: "Critical Items",   value: critical,         icon: <AlertTriangle size={18} />, color: "#ef4444" },
-            { label: "Total Exposures",  value: totalSeen,        icon: <BarChart2 size={18} />, color: "#14b8a6" },
-            { label: "Session Length",   value: "45 min",         icon: <Clock size={18} />, color: "#f97316" },
-          ].map(stat => (
-            <div
-              key={stat.label}
-              style={{
-                background: "#1e2433",
-                border: "1px solid #2d3748",
-                borderRadius: "0.65rem",
-                padding: "1rem 1.1rem",
-                display: "flex",
-                flexDirection: "column",
-                gap: "0.4rem",
-              }}
-            >
-              <span style={{ color: stat.color }}>{stat.icon}</span>
-              <span style={{ fontSize: "1.5rem", fontWeight: 800, color: "#e2e8f0", lineHeight: 1 }}>{stat.value}</span>
-              <span style={{ fontSize: "0.75rem", color: "#64748b" }}>{stat.label}</span>
-            </div>
-          ))}
-        </div>
+        <Link href="/add-question" style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", background: "#1e2433", color: "#818cf8", textDecoration: "none", borderRadius: "0.45rem", padding: "0.45rem 0.9rem", fontSize: "0.8rem", fontWeight: 700, border: "1px solid rgba(99,102,241,0.35)" }}>
+          + Add Question
+        </Link>
       </div>
 
-      {/* Today's Study Queue */}
-      <section style={{ marginBottom: "2.5rem" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
-          <h2 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 700, color: "#e2e8f0" }}>
-            Today&apos;s Study Queue
-          </h2>
-          <span style={{ fontSize: "0.78rem", color: "#64748b" }}>
-            Sorted by priority · {concepts.length} concepts
-          </span>
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}>
-          {loading ? (
-            <div style={{ color: "#64748b", fontSize: "0.875rem", padding: "1rem 0" }}>Loading...</div>
-          ) : concepts.length === 0 ? (
-            <div
-              style={{
-                background: "#1e2433",
-                border: "1px solid #2d3748",
-                borderRadius: "0.75rem",
-                padding: "2rem",
-                textAlign: "center",
-                color: "#64748b",
-                fontSize: "0.875rem",
-              }}
-            >
-              No concepts tracked yet. Add your first missed question to get started.
+      {/* ── Stats ── */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.6rem" }}>
+        {[
+          { label: "Concepts", value: concepts.length, color: "#6366f1", icon: <BookOpen size={14} /> },
+          { label: "Critical",  value: critical,        color: "#ef4444", icon: <AlertTriangle size={14} /> },
+          { label: "Exposures", value: totalSeen,       color: "#14b8a6", icon: <BarChart2 size={14} /> },
+        ].map(s => (
+          <div key={s.label} style={{ background: "#0f1117", border: "1px solid #1a1f2e", borderRadius: "0.6rem", padding: "0.85rem 1rem", display: "flex", alignItems: "center", gap: "0.65rem" }}>
+            <span style={{ color: s.color, opacity: 0.8 }}>{s.icon}</span>
+            <div>
+              <div style={{ fontSize: "1.2rem", fontWeight: 800, color: "#e2e8f0", lineHeight: 1 }}>{s.value}</div>
+              <div style={{ fontSize: "0.65rem", color: "#334155", marginTop: "0.15rem" }}>{s.label}</div>
             </div>
-          ) : (
-            concepts.map(concept => (
-              <ConceptCard key={concept.id} concept={concept} />
-            ))
+          </div>
+        ))}
+      </div>
+
+      {/* ── Main two-column body ── */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", flex: 1, minHeight: 0, height: 0 }}>
+
+        {/* Left — Study Queue */}
+        <div style={{ background: "#0f1117", border: "1px solid #1a1f2e", borderRadius: "0.75rem", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+          <div style={{ padding: "0.85rem 1rem", borderBottom: "1px solid #1a1f2e", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "#4a5568", textTransform: "uppercase", letterSpacing: "0.08em" }}>Study Queue</span>
+            <span style={{ fontSize: "0.65rem", color: "#2d3748" }}>{concepts.length} concepts · by priority</span>
+          </div>
+          <div style={{ flex: 1, overflowY: "auto", padding: "0 1rem" }}>
+            {loading ? (
+              <p style={{ color: "#2d3748", fontSize: "0.8rem", padding: "1rem 0" }}>Loading...</p>
+            ) : concepts.length === 0 ? (
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: "0.5rem", padding: "2rem 0" }}>
+                <div style={{ width: 36, height: 36, borderRadius: "50%", border: "1px dashed #1e2433" }} />
+                <span style={{ fontSize: "0.78rem", color: "#2d3748" }}>No concepts yet</span>
+                <Link href="/add-question" style={{ fontSize: "0.75rem", color: "#6366f1", textDecoration: "none", fontWeight: 600 }}>Add your first →</Link>
+              </div>
+            ) : (
+              concepts.map(c => <ConceptRow key={c.id} concept={c} />)
+            )}
+          </div>
+          {concepts.length > 0 && (
+            <div style={{ padding: "0.75rem 1rem", borderTop: "1px solid #1a1f2e" }}>
+              <Link href="/practice" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.4rem", background: "rgba(99,102,241,0.12)", color: "#818cf8", textDecoration: "none", borderRadius: "0.4rem", padding: "0.5rem", fontSize: "0.78rem", fontWeight: 700, border: "1px solid rgba(99,102,241,0.2)" }}>
+                Start Practice Session <ChevronRight size={13} />
+              </Link>
+            </div>
           )}
         </div>
-      </section>
 
-      {/* Session Planner */}
-      {concepts.length > 0 && (
-        <section>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
-            <h2 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 700, color: "#e2e8f0" }}>
-              Session Planner
-            </h2>
-            <span style={{ fontSize: "0.78rem", color: "#64748b" }}>Next session · 45 min</span>
+        {/* Right — Knowledge Graph */}
+        <div style={{ background: "#080b12", border: "1px solid #1a1f2e", borderRadius: "0.75rem", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+          <div style={{ padding: "0.85rem 1rem", borderBottom: "1px solid #1a1f2e", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "#4a5568", textTransform: "uppercase", letterSpacing: "0.08em" }}>Knowledge Map</span>
+            <Link href="/knowledge-graph" style={{ display: "flex", alignItems: "center", gap: "0.3rem", fontSize: "0.65rem", color: "#2d3748", textDecoration: "none", fontWeight: 600 }}>
+              <Network size={11} /> Expand
+            </Link>
           </div>
-          <div
-            style={{
-              background: "#1e2433",
-              border: "1px solid #2d3748",
-              borderRadius: "0.75rem",
-              overflow: "hidden",
-            }}
-          >
-            {concepts.slice(0, 4).map((concept, i, arr) => {
-              const mode =
-                concept.seen_count >= 5 ? "Active Recall + Diagram" :
-                concept.seen_count >= 3 ? "Practice Problems" :
-                concept.seen_count >= 2 ? "Mnemonics + Examples" : "Quick Review";
-              const timeSlots = ["0–15 min", "15–30 min", "30–40 min", "40–45 min"];
-              return (
-                <div
-                  key={concept.id}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "1rem",
-                    padding: "0.85rem 1.25rem",
-                    borderBottom: i < arr.length - 1 ? "1px solid #2d3748" : "none",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: "0.72rem",
-                      color: "#64748b",
-                      fontWeight: 600,
-                      minWidth: 80,
-                      fontFamily: "ui-monospace, monospace",
-                    }}
-                  >
-                    {timeSlots[i] ?? `+${i * 10} min`}
-                  </span>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 600, fontSize: "0.875rem", color: "#e2e8f0" }}>{concept.name}</div>
-                    <div style={{ fontSize: "0.75rem", color: "#64748b", marginTop: 2 }}>{mode}</div>
-                  </div>
-                  <span
-                    style={{
-                      fontSize: "0.7rem",
-                      background: "rgba(99,102,241,0.15)",
-                      color: "#818cf8",
-                      border: "1px solid rgba(99,102,241,0.3)",
-                      borderRadius: 999,
-                      padding: "2px 9px",
-                      fontWeight: 600,
-                    }}
-                  >
-                    Queued
-                  </span>
-                </div>
-              );
-            })}
+
+          {/* Legend */}
+          <div style={{ padding: "0.5rem 1rem", borderBottom: "1px solid #1a1f2e", display: "flex", gap: "0.85rem", flexWrap: "wrap" }}>
+            {(Object.entries(SUBJECT_META) as [Subject, { color: string }][]).map(([s, m]) => (
+              <div key={s} style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
+                <div style={{ width: 6, height: 6, borderRadius: "50%", background: m.color }} />
+                <span style={{ fontSize: "0.62rem", color: "#334155", fontWeight: 600 }}>{s}</span>
+              </div>
+            ))}
+            <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "0.3rem" }}>
+              <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#ef4444", boxShadow: "0 0 4px #ef4444" }} />
+              <span style={{ fontSize: "0.62rem", color: "#334155" }}>critical</span>
+            </div>
           </div>
-        </section>
-      )}
+
+          {/* Graph canvas */}
+          <div style={{ position: "relative", height: 340 }}>
+            <div style={{ position: "absolute", inset: 0 }}>
+              <MiniGraph concepts={concepts} />
+            </div>
+          </div>
+
+          {/* Node tooltip on click — shown at bottom */}
+          {selectedNode && (
+            <div style={{ padding: "0.65rem 1rem", borderTop: "1px solid #1a1f2e", background: "#0a0e17" }}>
+              <div style={{ fontWeight: 700, fontSize: "0.78rem", color: "#e2e8f0" }}>{selectedNode.name}</div>
+              <div style={{ fontSize: "0.65rem", color: "#4a5568", marginTop: "0.15rem" }}>{selectedNode.subject} · {selectedNode.seen_count}× seen</div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
