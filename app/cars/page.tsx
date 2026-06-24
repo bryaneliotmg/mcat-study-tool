@@ -618,69 +618,58 @@ export default function CARSPage() {
   if (phase === 'history' && historyPassage) {
     const qs: CARSQuestion[] = historyPassage.questions ?? [];
     return (
-      <div style={{ padding: '1.5rem 1.75rem', maxWidth: 760, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <button onClick={() => setPhase('select')} style={{ background: 'transparent', border: '1px solid #1e2433', borderRadius: '0.4rem', padding: '0.35rem 0.7rem', color: '#4a5568', fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-            ← Back
-          </button>
-          <div>
-            <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#e2e8f0', textTransform: 'capitalize' }}>{historyPassage.topic_domain}</div>
-            <div style={{ fontSize: '0.68rem', color: '#334155' }}>
-              Difficulty {historyPassage.difficulty_level}/5 · {new Date(historyPassage.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-              {historyPassage.score !== undefined && <span style={{ marginLeft: 8, color: historyPassage.score >= 3 ? '#22c55e' : historyPassage.score >= 2 ? '#eab308' : '#ef4444', fontWeight: 700 }}>· {historyPassage.score}/4 correct</span>}
-            </div>
-          </div>
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
+        {/* Top bar */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.6rem 1.25rem', borderBottom: '1px solid #1e2433', height: 44, boxSizing: 'border-box' }}>
+          <button onClick={() => setPhase('select')} style={{ background: 'transparent', border: '1px solid #1e2433', borderRadius: '0.4rem', padding: '0.25rem 0.65rem', color: '#4a5568', fontSize: '0.72rem', cursor: 'pointer' }}>← Back</button>
+          <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#e2e8f0', textTransform: 'capitalize' }}>{historyPassage.topic_domain}</span>
+          <span style={{ fontSize: '0.68rem', color: '#334155' }}>Difficulty {historyPassage.difficulty_level}/5 · {new Date(historyPassage.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+          {historyPassage.score !== undefined && <span style={{ fontSize: '0.72rem', fontWeight: 700, color: historyPassage.score >= 3 ? '#22c55e' : historyPassage.score >= 2 ? '#eab308' : '#ef4444' }}>{historyPassage.score}/4 correct</span>}
         </div>
 
-        {/* Full passage */}
-        <div style={{ background: '#0a0e17', border: '1px solid #1e2433', borderRadius: '0.85rem', overflow: 'hidden' }}>
-          <div style={{ padding: '0.65rem 1.25rem', borderBottom: '1px solid #1e2433' }}>
-            <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Passage</span>
-          </div>
-          <div style={{ padding: '1.25rem 1.5rem' }}>
+        {/* Two-column body */}
+        <div style={{ display: 'flex', height: 'calc(100vh - 44px)' }}>
+
+          {/* LEFT — passage */}
+          <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem 1.5rem', borderRight: '1px solid #1e2433' }}>
+            <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.85rem' }}>Passage</div>
             <Passage text={historyPassage.passage_text} />
           </div>
+
+          {/* RIGHT — questions */}
+          <div style={{ width: 420, flexShrink: 0, overflowY: 'auto', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem', background: '#0a0e17' }}>
+            {qs.map((q, i) => (
+              <div key={i} style={{ border: '1px solid #1e2433', borderRadius: '0.65rem', overflow: 'hidden' }}>
+                <div style={{ padding: '0.55rem 1rem', borderBottom: '1px solid #1a1f2e', display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#0f1117' }}>
+                  <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#6366f1' }}>Q{i + 1}</span>
+                  <span style={{ fontSize: '0.65rem', color: '#334155', fontWeight: 600 }}>{TYPE_LABELS[q.type] ?? q.type}</span>
+                </div>
+                <div style={{ padding: '0.85rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                  <p style={{ margin: 0, fontSize: '0.845rem', color: '#e2e8f0', fontWeight: 600, lineHeight: 1.6 }}>{q.stem}</p>
+                  <div style={{ display: 'flex', gap: '0.5rem', padding: '0.55rem 0.8rem', background: 'rgba(34,197,94,0.07)', border: '1px solid rgba(34,197,94,0.25)', borderRadius: '0.4rem', alignItems: 'flex-start' }}>
+                    <CheckCircle size={13} color="#22c55e" style={{ flexShrink: 0, marginTop: 2 }} />
+                    <div>
+                      <div style={{ fontSize: '0.6rem', fontWeight: 700, color: '#22c55e', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.15rem' }}>Correct</div>
+                      <div style={{ fontSize: '0.8rem', color: '#e2e8f0', lineHeight: 1.5 }}>{q.correct}</div>
+                    </div>
+                  </div>
+                  {([q.wrong_a, q.wrong_b, q.wrong_c]).map((text, j) => (
+                    <div key={j} style={{ display: 'flex', gap: '0.5rem', padding: '0.45rem 0.8rem', background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.12)', borderRadius: '0.4rem', alignItems: 'flex-start' }}>
+                      <XCircle size={12} color="#ef4444" style={{ flexShrink: 0, marginTop: 2 }} />
+                      <div style={{ fontSize: '0.77rem', color: '#64748b', lineHeight: 1.5 }}>{text}</div>
+                    </div>
+                  ))}
+                  <div style={{ fontSize: '0.75rem', color: '#94a3b8', lineHeight: 1.65, padding: '0.55rem 0.8rem', background: '#0f1117', borderRadius: '0.4rem', borderLeft: '3px solid #22c55e33' }}>
+                    {q.explanation}
+                  </div>
+                </div>
+              </div>
+            ))}
+            <button onClick={() => setPhase('select')} style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'transparent', border: '1px solid #1e2433', borderRadius: '0.4rem', padding: '0.45rem 0.85rem', color: '#4a5568', fontSize: '0.78rem', cursor: 'pointer' }}>
+              <RotateCcw size={12} /> Back to CARS
+            </button>
+          </div>
         </div>
-
-        {/* Questions with answers revealed */}
-        {qs.map((q, i) => {
-          const correctAns = q.correct;
-          return (
-            <div key={i} style={{ background: '#0a0e17', border: '1px solid #1e2433', borderRadius: '0.65rem', overflow: 'hidden' }}>
-              <div style={{ padding: '0.65rem 1.25rem', borderBottom: '1px solid #1e2433', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#6366f1' }}>Q{i + 1}</span>
-                <span style={{ fontSize: '0.68rem', color: '#334155', fontWeight: 600 }}>{TYPE_LABELS[q.type] ?? q.type}</span>
-              </div>
-              <div style={{ padding: '0.85rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-                <p style={{ margin: 0, fontSize: '0.875rem', color: '#e2e8f0', fontWeight: 600, lineHeight: 1.6 }}>{q.stem}</p>
-                {/* Correct answer */}
-                <div style={{ display: 'flex', gap: '0.6rem', padding: '0.6rem 0.85rem', background: 'rgba(34,197,94,0.07)', border: '1px solid rgba(34,197,94,0.25)', borderRadius: '0.45rem', alignItems: 'flex-start' }}>
-                  <CheckCircle size={14} color="#22c55e" style={{ flexShrink: 0, marginTop: 2 }} />
-                  <div>
-                    <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#22c55e', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.2rem' }}>Correct Answer</div>
-                    <div style={{ fontSize: '0.845rem', color: '#e2e8f0', lineHeight: 1.5 }}>{correctAns}</div>
-                  </div>
-                </div>
-                {/* Wrong answers */}
-                {([['wrong_a', q.wrong_a], ['wrong_b', q.wrong_b], ['wrong_c', q.wrong_c]] as [string, string][]).map(([, text]) => (
-                  <div key={text} style={{ display: 'flex', gap: '0.6rem', padding: '0.5rem 0.85rem', background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.12)', borderRadius: '0.45rem', alignItems: 'flex-start' }}>
-                    <XCircle size={13} color="#ef4444" style={{ flexShrink: 0, marginTop: 2 }} />
-                    <div style={{ fontSize: '0.8rem', color: '#64748b', lineHeight: 1.5 }}>{text}</div>
-                  </div>
-                ))}
-                {/* Explanation */}
-                <div style={{ fontSize: '0.78rem', color: '#94a3b8', lineHeight: 1.65, padding: '0.6rem 0.85rem', background: '#0f1117', borderRadius: '0.4rem', borderLeft: '3px solid #22c55e33' }}>
-                  {q.explanation}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-
-        <button onClick={() => setPhase('select')} style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'transparent', border: '1px solid #1e2433', borderRadius: '0.4rem', padding: '0.5rem 0.9rem', color: '#4a5568', fontSize: '0.8rem', cursor: 'pointer' }}>
-          <RotateCcw size={13} /> Back to CARS
-        </button>
       </div>
     );
   }
