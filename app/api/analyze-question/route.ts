@@ -1,19 +1,11 @@
-import Anthropic from '@anthropic-ai/sdk';
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-
-const client = new Anthropic();
-
-function parseJson(text: string) {
-  const clean = text.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim();
-  return JSON.parse(clean);
-}
+import { flash, parseJson, ask } from '@/lib/gemini';
 
 export async function POST(request: Request) {
   try {
     const { raw_text, subject, notes } = await request.json();
 
-    // Fetch relevant Kaplan chapters for this section
     const sectionToBooks: Record<string, string[]> = {
       'B/B': ['biology', 'biochemistry'],
       'C/P': ['gen_chem', 'org_chem', 'physics', 'biochemistry'],
@@ -47,14 +39,9 @@ export async function POST(request: Request) {
       }
     }
 
-    const response = await client.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 800,
-      system: 'You are an MCAT content expert with deep knowledge of both the AAMC content outline and the Kaplan MCAT review book series.',
-      messages: [
-        {
-          role: 'user',
-          content: `A student missed this MCAT question:
+    const prompt = `You are an MCAT content expert with deep knowledge of both the AAMC content outline and the Kaplan MCAT review book series.
+
+A student missed this MCAT question:
 
 QUESTION TEXT: ${raw_text}
 SECTION: ${subject}
@@ -72,14 +59,10 @@ Analyze this question and output ONLY this JSON. For kaplan_book and kaplan_chap
   "gap_analysis": "2-3 sentences explaining exactly what knowledge or reasoning gap this question exposes and what she needs to strengthen",
   "priority": "critical|high|medium|low",
   "difficulty": 3
-}`,
-        },
-      ],
-    });
+}`;
 
-    const analysis = parseJson(response.content[0].type === 'text' ? response.content[0].text : '');
+    const analysis = parseJson(await ask(flash, prompt));
 
-    // Check for existing concept (case-insensitive)
     const { data: existing } = await supabase
       .from('concepts')
       .select('*')
@@ -124,7 +107,6 @@ Analyze this question and output ONLY this JSON. For kaplan_book and kaplan_chap
       concept = created;
     }
 
-    // Insert question
     const { data: question } = await supabase
       .from('questions')
       .insert({

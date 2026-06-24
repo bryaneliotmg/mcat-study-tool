@@ -1,25 +1,13 @@
-import Anthropic from '@anthropic-ai/sdk';
 import { NextResponse } from 'next/server';
-
-const client = new Anthropic();
-
-function parseJson(text: string) {
-  const clean = text.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim();
-  return JSON.parse(clean);
-}
+import { flash, parseJson, ask } from '@/lib/gemini';
 
 export async function POST(request: Request) {
   try {
     const { question_id, concept_name, correct_answer, student_answer, reasoning_text, question_type } = await request.json();
 
-    const response = await client.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 300,
-      system: 'You are an MCAT learning diagnostician. Classify student errors precisely.',
-      messages: [
-        {
-          role: 'user',
-          content: `A student answered an MCAT question incorrectly.
+    const prompt = `You are an MCAT learning diagnostician. Classify student errors precisely.
+
+A student answered an MCAT question incorrectly.
 
 Concept being tested: ${concept_name}
 Question type: ${question_type}
@@ -39,13 +27,9 @@ Output ONLY this JSON:
   "failure_type": "KNOWLEDGE_GAP",
   "explanation": "One sentence explaining why this classification fits",
   "recommended_action": "One sentence on what she should do next"
-}`,
-        },
-      ],
-    });
+}`;
 
-    const result = parseJson(response.content[0].type === 'text' ? response.content[0].text : '');
-
+    const result = parseJson(await ask(flash, prompt));
     return NextResponse.json({ question_id, ...result });
   } catch (err) {
     console.error('classify-failure error:', err);

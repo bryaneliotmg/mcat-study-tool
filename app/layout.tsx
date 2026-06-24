@@ -10,6 +10,7 @@ import {
   Network,
   BookOpen,
   Dumbbell,
+  GraduationCap,
 } from "lucide-react";
 
 const geistSans = Geist({
@@ -26,6 +27,7 @@ const NAV_ITEMS = [
   { href: "/",                label: "Dashboard",      icon: LayoutDashboard },
   { href: "/add-question",    label: "Add Question",   icon: PlusCircle },
   { href: "/practice",        label: "Practice",       icon: Dumbbell },
+  { href: "/cars",            label: "CARS",           icon: GraduationCap },
   { href: "/knowledge-graph", label: "Knowledge Graph",icon: Network },
   { href: "/word-clarity",    label: "Word Clarity",   icon: BookOpen },
 ];

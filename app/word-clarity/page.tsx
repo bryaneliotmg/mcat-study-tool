@@ -1,9 +1,15 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { Search, CheckCircle, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { Search, CheckCircle, Clock, ChevronDown, ChevronUp, Sparkles, Lightbulb } from "lucide-react";
 import { createWordClaritySession, markWordCleared, getWordClaritySessions } from "@/lib/db";
 import type { WordClaritySession } from "@/lib/db";
+
+interface AIResult {
+  definitions: Definition[];
+  eli5: string;
+  mcat_tip: string;
+}
 
 interface ClearedWord {
   word: string;
@@ -48,6 +54,10 @@ export default function WordClarityPage() {
   const [activeWord, setActiveWord] = useState("");
   const [context, setContext] = useState("");
   const [definitions, setDefinitions] = useState<Definition[]>([]);
+  const [eli5, setEli5] = useState('');
+  const [mcatTip, setMcatTip] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState('');
   const [sentenceCount, setSentenceCount] = useState(5);
   const [sentences, setSentences] = useState<string[]>([]);
   const [defSentences, setDefSentences] = useState<Record<number, string>>({});
@@ -75,26 +85,45 @@ export default function WordClarityPage() {
     const word = inputWord.trim();
     if (!word) return;
     setActiveWord(word);
-    const defs = getMockDefinition(word);
-    setDefinitions(defs);
+    setDefinitions([]);
+    setEli5('');
+    setMcatTip('');
+    setAiError('');
     setSentences(Array(sentenceCount).fill(""));
     setDefSentences({});
     setIsCleared(false);
     setContext("");
     setActiveSessionId(null);
+    setAiLoading(true);
 
     try {
+      const res = await fetch('/api/word-clarity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ word, context }),
+      });
+      const data: AIResult = await res.json();
+      if (!res.ok) throw new Error((data as { error?: string }).error ?? 'AI failed');
+      setDefinitions(data.definitions);
+      setEli5(data.eli5);
+      setMcatTip(data.mcat_tip);
+
       const session = await createWordClaritySession({
         word,
-        context: null,
-        definitions: defs.map(d => ({ meaning: d.text, partOfSpeech: d.sense })),
+        context: context || null,
+        definitions: data.definitions.map(d => ({ meaning: d.text, partOfSpeech: d.sense })),
         sentences: null,
         is_cleared: false,
         cleared_at: null,
       });
       setActiveSessionId(session.id);
     } catch (err) {
-      console.error("Failed to create word clarity session:", err);
+      setAiError(String(err));
+      // fallback to mock
+      const defs = getMockDefinition(word);
+      setDefinitions(defs);
+    } finally {
+      setAiLoading(false);
     }
   }
 
@@ -132,6 +161,7 @@ export default function WordClarityPage() {
 
   return (
     <div style={{ padding: "2rem 2.5rem", maxWidth: 820, margin: "0 auto" }}>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
 
       {/* Header */}
       <div style={{ marginBottom: "2rem" }}>
@@ -303,6 +333,15 @@ export default function WordClarityPage() {
             <div style={{ padding: "1rem 1.25rem", borderBottom: "1px solid #2d3748" }}>
               <span style={{ fontWeight: 700, fontSize: "0.9rem", color: "#e2e8f0" }}>Definition{definitions.length > 1 ? "s" : ""}</span>
             </div>
+            {aiLoading && (
+              <div style={{ padding: "1.5rem", textAlign: "center", color: "#4a5568", fontSize: "0.82rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
+                <span style={{ width: 14, height: 14, border: "2px solid #2d3748", borderTop: "2px solid #6366f1", borderRadius: "50%", display: "inline-block", animation: "spin 0.8s linear infinite" }} />
+                Asking Claude…
+              </div>
+            )}
+            {aiError && (
+              <div style={{ padding: "0.75rem 1.25rem", fontSize: "0.78rem", color: "#f97316" }}>Using local definition (AI unavailable)</div>
+            )}
             {definitions.map((def, i) => (
               <div
                 key={i}
@@ -327,6 +366,25 @@ export default function WordClarityPage() {
               </div>
             ))}
           </div>
+
+          {/* ELI5 */}
+          {eli5 && (
+            <div style={{ background: "#1e2433", border: "1px solid #2d3748", borderRadius: "0.75rem", overflow: "hidden" }}>
+              <div style={{ padding: "1rem 1.25rem", borderBottom: "1px solid #2d3748", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <Sparkles size={15} color="#eab308" />
+                <span style={{ fontWeight: 700, fontSize: "0.9rem", color: "#e2e8f0" }}>Explain Like I&apos;m 5</span>
+              </div>
+              <div style={{ padding: "1rem 1.25rem" }}>
+                <p style={{ margin: 0, fontSize: "0.925rem", color: "#fde68a", lineHeight: 1.75, fontStyle: "italic" }}>&ldquo;{eli5}&rdquo;</p>
+              </div>
+              {mcatTip && (
+                <div style={{ padding: "0.75rem 1.25rem", borderTop: "1px solid #2d3748", display: "flex", gap: "0.6rem", alignItems: "flex-start" }}>
+                  <Lightbulb size={13} color="#6366f1" style={{ flexShrink: 0, marginTop: 2 }} />
+                  <p style={{ margin: 0, fontSize: "0.78rem", color: "#94a3b8", lineHeight: 1.6 }}><span style={{ fontWeight: 700, color: "#6366f1" }}>MCAT tip: </span>{mcatTip}</p>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Sentence practice */}
           <div

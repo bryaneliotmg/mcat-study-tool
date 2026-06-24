@@ -1,15 +1,8 @@
-import Anthropic from '@anthropic-ai/sdk';
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { flash, parseJson, ask } from '@/lib/gemini';
 
-const client = new Anthropic();
-
-function parseJson(text: string) {
-  const clean = text.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim();
-  return JSON.parse(clean);
-}
-
-async function generateQuestion(params: {
+async function generateSet(params: {
   concept_name: string;
   aamc_category: string;
   aamc_category_name: string;
@@ -17,169 +10,142 @@ async function generateQuestion(params: {
   failure_type: string | null;
   difficulty: number;
 }) {
-  const generatorSystem = `You are an expert MCAT question writer working for a medical education company. You must follow these rules without exception:
-- Write a 150-200 word passage containing a scenario, experiment, or data relevant to the concept
-- The question MUST be unsolvable from memory alone — it must require reasoning from the passage
-- Wrong answer B represents the most common misconception about this concept
-- Wrong answer C is partially correct but missing a key reasoning step
-- Wrong answer D is plausible only if the student misread or misinterpreted the passage
-- Tag the question type as exactly one of: recall, application, or reasoning
-- Output ONLY valid JSON, no other text`;
+  const failureHint = params.failure_type === 'KNOWLEDGE_GAP'
+    ? 'This student has a knowledge gap — at least 2 questions should test direct recall of key facts.'
+    : params.failure_type === 'REASONING_GAP'
+    ? 'This student struggles to apply knowledge under pressure — all questions must require multi-step reasoning from the passage, not recall.'
+    : params.failure_type === 'PASSAGE_MISREAD'
+    ? 'This student misreads passages — include one question that requires very careful reading of a specific passage detail.'
+    : '';
 
-  const generatorUser = `Generate an MCAT ${params.section} question targeting this AAMC concept:
-Category ${params.aamc_category}: ${params.aamc_category_name}
-Specific topic: ${params.concept_name}
-Student failure type: ${params.failure_type ?? 'unknown'}
-Difficulty level: ${params.difficulty}/5
+  const prompt = `You are an expert MCAT question writer. Write passage-based question sets exactly like those on the real MCAT.
 
-Output this exact JSON structure:
+Rules:
+- One passage (150-200 words) with a scenario, experiment, or data table
+- 4 questions on that single passage, each testing a different reasoning skill
+- Questions must require the passage — they cannot be answered from memory alone
+- Wrong answers are crafted traps: common misconceptions, partial truths, passage misreadings
+- Output ONLY valid JSON
+
+Write an MCAT ${params.section} passage + 4-question set targeting:
+AAMC Category ${params.aamc_category}: ${params.aamc_category_name}
+Concept: ${params.concept_name}
+Difficulty: ${params.difficulty}/5
+${failureHint}
+
+Output this exact JSON:
 {
   "passage": "150-200 word passage with scenario/experiment/data",
-  "question": "The question stem",
-  "correct_answer": "The correct answer text",
-  "wrong_answer_b": "Common misconception answer",
-  "wrong_answer_c": "Partially correct answer",
-  "wrong_answer_d": "Passage misreading trap answer",
-  "explanations": {
-    "why_correct": "Why the correct answer is right",
-    "why_b_wrong": "Why B is wrong specifically",
-    "why_c_wrong": "Why C is wrong specifically",
-    "why_d_wrong": "Why D is wrong specifically"
-  },
-  "question_type": "recall|application|reasoning"
-}`;
+  "questions": [
+    {
+      "stem": "Question stem",
+      "type": "recall|application|reasoning|data_interpretation",
+      "correct": "Correct answer text",
+      "wrong_b": "Common misconception answer",
+      "wrong_c": "Partially correct / missing reasoning step",
+      "wrong_d": "Passage misreading trap",
+      "why_correct": "Why correct is right",
+      "why_b_wrong": "Why B is wrong",
+      "why_c_wrong": "Why C is wrong",
+      "why_d_wrong": "Why D is wrong"
+    }
+  ]
+}
+Write exactly 4 questions. Vary question types across: recall, application, reasoning, data_interpretation.`;
 
-  const response = await client.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 1500,
-    system: generatorSystem,
-    messages: [{ role: 'user', content: generatorUser }],
-  });
-
-  return parseJson(response.content[0].type === 'text' ? response.content[0].text : '');
+  return parseJson(await ask(flash, prompt));
 }
 
-async function checkQuality(generated: {
-  passage: string;
-  question: string;
-  correct_answer: string;
-  wrong_answer_b: string;
-  wrong_answer_c: string;
-  wrong_answer_d: string;
-}) {
-  const checkerSystem = `You are an MCAT quality auditor. You have no knowledge of how this question was generated. Your job is to ensure questions meet rigorous MCAT standards.`;
+async function qualityCheck(passage: string, questions: Array<{ stem: string; correct: string; wrong_b: string }>) {
+  const prompt = `You are an MCAT quality auditor. Evaluate question sets strictly.
 
-  const checkerUser = `Evaluate this MCAT question:
+PASSAGE: ${passage}
 
-PASSAGE: ${generated.passage}
-QUESTION: ${generated.question}
-CORRECT ANSWER: ${generated.correct_answer}
-WRONG ANSWER B: ${generated.wrong_answer_b}
-WRONG ANSWER C: ${generated.wrong_answer_c}
-WRONG ANSWER D: ${generated.wrong_answer_d}
+${questions.map((q, i) => `Q${i + 1}: ${q.stem}\nCorrect: ${q.correct}\nB: ${q.wrong_b}`).join('\n\n')}
 
-Answer these specifically:
-1. Can this question be answered correctly from memory alone without reading the passage? (yes/no)
-2. Do the wrong answers represent real MCAT-level misconceptions, or are they obviously wrong? (rate 1-5)
-3. Does this question test reasoning or just trivia recall? (rate 1-5, where 5=pure reasoning)
-4. Is the passage 150-200 words and does it contain actual data, scenario, or experimental context? (yes/no)
+Rate each:
+1. Can any question be answered without reading the passage? (yes/no)
+2. Are wrong answers genuinely tricky MCAT-level distractors? (1-5)
+3. Do questions span different reasoning skills? (yes/no)
 
 Output ONLY this JSON:
-{
-  "memory_only": false,
-  "wrong_answer_quality": 4,
-  "reasoning_level": 4,
-  "passage_quality": true,
-  "approved": true,
-  "rejection_reason": null
-}`;
+{"memory_only": false, "distractor_quality": 4, "skill_variety": true, "approved": true}`;
 
-  const response = await client.messages.create({
-    model: 'claude-haiku-4-5-20251001',
-    max_tokens: 300,
-    system: checkerSystem,
-    messages: [{ role: 'user', content: checkerUser }],
-  });
-
-  const result = parseJson(response.content[0].type === 'text' ? response.content[0].text : '');
-
-  result.approved =
-    result.memory_only === false &&
-    result.wrong_answer_quality >= 3 &&
-    result.reasoning_level >= 3 &&
-    result.passage_quality === true;
-
+  const result = parseJson(await ask(flash, prompt));
+  result.approved = !result.memory_only && result.distractor_quality >= 3 && result.skill_variety;
   return result;
+}
+
+function shuffleAnswers(q: { correct: string; wrong_b: string; wrong_c: string; wrong_d: string }) {
+  const pool = [
+    { text: q.correct, is_correct: true },
+    { text: q.wrong_b, is_correct: false },
+    { text: q.wrong_c, is_correct: false },
+    { text: q.wrong_d, is_correct: false },
+  ];
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  const labels = ['A', 'B', 'C', 'D'];
+  const answers = pool.map((a, i) => ({ ...a, label: labels[i] }));
+  const correct_label = answers.find(a => a.is_correct)!.label;
+  return { answers, correct_label };
 }
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { concept_id, concept_name, aamc_category, aamc_category_name, section, failure_type, difficulty } = body;
+    const { concept_id, concept_name, aamc_category, aamc_category_name, section, failure_type, difficulty } = await request.json();
 
-    // Call 1: Generate
-    let generated = await generateQuestion({ concept_name, aamc_category, aamc_category_name, section, failure_type, difficulty });
+    let generated = await generateSet({ concept_name, aamc_category, aamc_category_name, section, failure_type, difficulty });
+    let quality = await qualityCheck(generated.passage, generated.questions);
 
-    // Call 2: Quality check
-    let quality = await checkQuality(generated);
-
-    // Retry once if rejected
     if (!quality.approved) {
-      generated = await generateQuestion({ concept_name, aamc_category, aamc_category_name, section, failure_type, difficulty });
-      quality = await checkQuality(generated);
+      generated = await generateSet({ concept_name, aamc_category, aamc_category_name, section, failure_type, difficulty });
+      quality = await qualityCheck(generated.passage, generated.questions);
     }
 
-    const qualityScore = Math.round((quality.wrong_answer_quality + quality.reasoning_level) / 2);
+    const { data: passageRow } = await supabase
+      .from('passages')
+      .insert({ passage_text: generated.passage, subject: section, concept_id: concept_id ?? null, aamc_category, difficulty })
+      .select().single();
 
-    // Shuffle answers (A=correct, B/C/D=wrong — randomize positions)
-    const answers = [
-      { text: generated.correct_answer, label: 'A', is_correct: true },
-      { text: generated.wrong_answer_b, label: 'B', is_correct: false },
-      { text: generated.wrong_answer_c, label: 'C', is_correct: false },
-      { text: generated.wrong_answer_d, label: 'D', is_correct: false },
-    ];
-    // Shuffle
-    for (let i = answers.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [answers[i], answers[j]] = [answers[j], answers[i]];
-    }
-    answers.forEach((a, i) => { a.label = ['A', 'B', 'C', 'D'][i]; });
+    const passageId = passageRow?.id ?? null;
 
-    const correctLabel = answers.find(a => a.is_correct)!.label;
-
-    // Store in DB
-    const { data: question, error } = await supabase
-      .from('questions')
-      .insert({
+    const savedQuestions = [];
+    for (const q of generated.questions) {
+      const { answers, correct_label } = shuffleAnswers(q);
+      const { data: saved } = await supabase.from('questions').insert({
         concept_id: concept_id ?? null,
-        raw_text: generated.question,
+        raw_text: q.stem,
         input_method: 'generated',
         subject: section,
         passage: generated.passage,
+        passage_group_id: passageId,
         answer_a: answers[0].text,
         answer_b: answers[1].text,
         answer_c: answers[2].text,
         answer_d: answers[3].text,
-        correct_answer: correctLabel,
-        explanations: generated.explanations,
-        question_type: generated.question_type,
+        correct_answer: correct_label,
+        explanations: {
+          why_correct: q.why_correct,
+          why_b_wrong: q.why_b_wrong,
+          why_c_wrong: q.why_c_wrong,
+          why_d_wrong: q.why_d_wrong,
+        },
+        question_type: q.type,
         quality_approved: quality.approved,
-        quality_score: qualityScore,
+        quality_score: quality.distractor_quality,
         difficulty,
         aamc_category,
-      })
-      .select()
-      .single();
+      }).select().single();
 
-    if (error) throw error;
+      if (saved) {
+        savedQuestions.push({ question: saved, answers, correct_label, explanations: { why_correct: q.why_correct, why_b_wrong: q.why_b_wrong, why_c_wrong: q.why_c_wrong, why_d_wrong: q.why_d_wrong } });
+      }
+    }
 
-    return NextResponse.json({
-      question,
-      answers,
-      correct_label: correctLabel,
-      explanations: generated.explanations,
-      quality,
-    });
+    return NextResponse.json({ passage: generated.passage, passage_id: passageId, questions: savedQuestions, quality });
   } catch (err) {
     console.error('generate-question error:', err);
     return NextResponse.json({ error: String(err) }, { status: 500 });
