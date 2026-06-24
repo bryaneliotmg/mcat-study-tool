@@ -417,91 +417,85 @@ export default function CARSPage() {
     const correctAns = currentQ.answers.find(a => a.is_correct)!;
 
     return (
-      <div style={{ padding: '1.25rem 1.75rem', maxWidth: 760, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-        {/* Progress + timer */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+        {/* Top bar */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.65rem 1.25rem', borderBottom: '1px solid #1e2433', flexShrink: 0 }}>
           <div style={{ display: 'flex', gap: '0.35rem' }}>
             {[0, 1, 2, 3].map(i => (
               <div key={i} style={{ width: 8, height: 8, borderRadius: '50%', background: submitted[i] ? (picks[i] === questions[i]?.correct_label ? '#22c55e' : '#ef4444') : i === qIndex ? '#6366f1' : '#1e2433', border: i === qIndex ? '2px solid #6366f1' : '1px solid #2d3748' }} />
             ))}
           </div>
-          <span style={{ fontSize: '0.7rem', color: '#334155' }}>Q{qIndex + 1} of 4 · {TYPE_LABELS[currentQ.original.type] ?? currentQ.original.type}</span>
+          <span style={{ fontSize: '0.7rem', color: '#4a5568' }}>Q{qIndex + 1} of 4</span>
+          <span style={{ fontSize: '0.7rem', color: '#6366f1', fontWeight: 700 }}>{TYPE_LABELS[currentQ.original.type] ?? currentQ.original.type}</span>
           <span style={{ marginLeft: 'auto', fontSize: '0.72rem', color: timerColor, fontVariantNumeric: 'tabular-nums', fontWeight: 700 }}>
             <Clock size={12} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 3 }} />{fmt(qTime)}
           </span>
-          <button onClick={() => setPassageHidden(h => !h)}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', background: 'transparent', border: '1px solid #1e2433', borderRadius: '0.35rem', padding: '0.2rem 0.6rem', color: '#334155', cursor: 'pointer', fontSize: '0.65rem' }}>
-            {passageHidden ? <Eye size={11} /> : <EyeOff size={11} />}
-            {passageHidden ? 'show passage' : 'hide passage'}
-          </button>
+          <button onClick={() => setPhase('select')} style={{ background: 'transparent', border: '1px solid #1e2433', borderRadius: '0.35rem', padding: '0.2rem 0.6rem', color: '#334155', cursor: 'pointer', fontSize: '0.65rem' }}>Exit</button>
         </div>
 
-        {/* Collapsed passage toggle */}
-        {!passageHidden && (
-          <div style={{ background: '#0a0e17', border: '1px solid #1e2433', borderRadius: '0.65rem', overflow: 'hidden' }}>
-            <div style={{ padding: '0.5rem 1rem', borderBottom: '1px solid #1e2433', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Passage Reference</span>
-              <span style={{ fontSize: '0.65rem', color: '#ef4444', fontWeight: 700 }}>CARS: answer from text only</span>
+        {/* Two-column body */}
+        <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+
+          {/* LEFT — passage */}
+          <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem 1.5rem', borderRight: '1px solid #1e2433' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.85rem' }}>
+              <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Passage</span>
+              <span style={{ fontSize: '0.65rem', color: '#6366f1', fontWeight: 700, textTransform: 'capitalize' }}>{domain}</span>
+              <span style={{ marginLeft: 'auto', fontSize: '0.65rem', color: '#2d3748' }}>{difficulty}/5</span>
             </div>
-            <div style={{ padding: '0.85rem 1.25rem', maxHeight: 180, overflowY: 'auto' }}>
-              <Passage text={passage} color="#4a5568" size="0.8rem" />
-            </div>
+            <Passage text={passage} />
           </div>
-        )}
 
-        {/* Question */}
-        <p style={{ margin: 0, color: '#e2e8f0', fontSize: '0.925rem', fontWeight: 600, lineHeight: 1.6 }}>{currentQ.original.stem}</p>
+          {/* RIGHT — question + answers */}
+          <div style={{ width: 420, flexShrink: 0, overflowY: 'auto', padding: '1.25rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <p style={{ margin: 0, color: '#e2e8f0', fontSize: '0.9rem', fontWeight: 600, lineHeight: 1.65 }}>{currentQ.original.stem}</p>
 
-        {/* Choices */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-          {currentQ.answers.map(a => {
-            const sel = currentPick === a.label;
-            let borderColor = sel ? '#6366f1' : '#1e2433';
-            let bg = sel ? 'rgba(99,102,241,0.1)' : '#0a0e17';
-            let textColor = sel ? '#e2e8f0' : '#64748b';
-            if (isSubmitted) {
-              if (a.is_correct) { borderColor = '#22c55e'; bg = 'rgba(34,197,94,0.08)'; textColor = '#e2e8f0'; }
-              else if (sel && !a.is_correct) { borderColor = '#ef4444'; bg = 'rgba(239,68,68,0.08)'; textColor = '#e2e8f0'; }
-            }
-            return (
-              <button key={a.label} onClick={() => !isSubmitted && setPicks(prev => { const n = [...prev]; n[qIndex] = a.label; return n; })}
-                style={{ display: 'flex', alignItems: 'flex-start', gap: '0.7rem', padding: '0.7rem 1rem', borderRadius: '0.5rem', border: `1px solid ${borderColor}`, background: bg, color: textColor, textAlign: 'left', cursor: isSubmitted ? 'default' : 'pointer', width: '100%' }}>
-                <span style={{ fontWeight: 800, fontSize: '0.82rem', flexShrink: 0, minWidth: 18, color: isSubmitted && a.is_correct ? '#22c55e' : isSubmitted && sel && !a.is_correct ? '#ef4444' : textColor }}>{a.label}.</span>
-                <span style={{ fontSize: '0.845rem', lineHeight: 1.5 }}>{a.text}</span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+              {currentQ.answers.map(a => {
+                const sel = currentPick === a.label;
+                let borderColor = sel ? '#6366f1' : '#1e2433';
+                let bg = sel ? 'rgba(99,102,241,0.1)' : '#0a0e17';
+                let textColor = sel ? '#e2e8f0' : '#64748b';
+                if (isSubmitted) {
+                  if (a.is_correct) { borderColor = '#22c55e'; bg = 'rgba(34,197,94,0.08)'; textColor = '#e2e8f0'; }
+                  else if (sel && !a.is_correct) { borderColor = '#ef4444'; bg = 'rgba(239,68,68,0.08)'; textColor = '#e2e8f0'; }
+                }
+                return (
+                  <button key={a.label} onClick={() => !isSubmitted && setPicks(prev => { const n = [...prev]; n[qIndex] = a.label; return n; })}
+                    style={{ display: 'flex', alignItems: 'flex-start', gap: '0.65rem', padding: '0.65rem 0.9rem', borderRadius: '0.5rem', border: `1px solid ${borderColor}`, background: bg, color: textColor, textAlign: 'left', cursor: isSubmitted ? 'default' : 'pointer', width: '100%' }}>
+                    <span style={{ fontWeight: 800, fontSize: '0.8rem', flexShrink: 0, minWidth: 16, color: isSubmitted && a.is_correct ? '#22c55e' : isSubmitted && sel && !a.is_correct ? '#ef4444' : textColor }}>{a.label}.</span>
+                    <span style={{ fontSize: '0.82rem', lineHeight: 1.55 }}>{a.text}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {isSubmitted ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.6rem 0.85rem', borderRadius: '0.5rem', background: questionIsCorrect ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)', border: `1px solid ${questionIsCorrect ? 'rgba(34,197,94,0.25)' : 'rgba(239,68,68,0.25)'}` }}>
+                  {questionIsCorrect ? <CheckCircle size={14} color="#22c55e" /> : <XCircle size={14} color="#ef4444" />}
+                  <span style={{ fontWeight: 700, fontSize: '0.8rem', color: questionIsCorrect ? '#22c55e' : '#ef4444' }}>{questionIsCorrect ? 'Correct' : `Incorrect · ${correctAns.label} was right`}</span>
+                </div>
+                <div style={{ padding: '0.6rem 0.85rem', background: '#0a0e17', borderRadius: '0.45rem', borderLeft: `3px solid ${questionIsCorrect ? '#22c55e55' : '#ef444455'}` }}>
+                  <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#22c55e', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.2rem' }}>Why {correctAns.label} is correct</div>
+                  <div style={{ fontSize: '0.77rem', color: '#94a3b8', lineHeight: 1.6 }}>
+                    <span style={{ fontWeight: 700, color: '#e2e8f0' }}>{correctAns.text} — </span>
+                    {currentQ.original.explanation}
+                  </div>
+                </div>
+                <button onClick={nextQuestion}
+                  style={{ alignSelf: 'flex-end', background: qIndex < 3 ? 'linear-gradient(135deg, #6366f1, #4f46e5)' : 'linear-gradient(135deg, #14b8a6, #0d9488)', color: '#fff', border: 'none', borderRadius: '0.4rem', padding: '0.5rem 1rem', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  {qIndex < 3 ? <>Next <ChevronRight size={13} /></> : <>Results <ChevronRight size={13} /></>}
+                </button>
+              </div>
+            ) : (
+              <button onClick={submitQuestion} disabled={!currentPick}
+                style={{ background: currentPick ? 'linear-gradient(135deg, #6366f1, #4f46e5)' : '#1a1f2e', color: currentPick ? '#fff' : '#334155', border: 'none', borderRadius: '0.4rem', padding: '0.55rem 1rem', fontSize: '0.8rem', fontWeight: 700, cursor: currentPick ? 'pointer' : 'not-allowed', alignSelf: 'flex-end' }}>
+                Submit Answer
               </button>
-            );
-          })}
+            )}
+          </div>
         </div>
-
-        {isSubmitted ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', padding: '0.7rem 1rem', borderRadius: '0.55rem', background: questionIsCorrect ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)', border: `1px solid ${questionIsCorrect ? 'rgba(34,197,94,0.25)' : 'rgba(239,68,68,0.25)'}` }}>
-              {questionIsCorrect ? <CheckCircle size={16} color="#22c55e" /> : <XCircle size={16} color="#ef4444" />}
-              <span style={{ fontWeight: 700, fontSize: '0.82rem', color: questionIsCorrect ? '#22c55e' : '#ef4444' }}>{questionIsCorrect ? 'Correct' : `Incorrect · ${correctAns.label} was right`}</span>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', padding: '0.65rem 0.9rem', background: '#0a0e17', borderRadius: '0.45rem', borderLeft: `3px solid ${questionIsCorrect ? '#22c55e55' : '#ef444455'}` }}>
-              <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#22c55e', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.15rem' }}>
-                Why {correctAns.label} is correct
-              </div>
-              <div style={{ fontSize: '0.78rem', color: '#94a3b8', lineHeight: 1.6 }}>
-                <span style={{ fontWeight: 700, color: '#e2e8f0' }}>{correctAns.text} — </span>
-                {currentQ.original.explanation}
-              </div>
-            </div>
-            <button onClick={nextQuestion}
-              style={{ alignSelf: 'flex-end', background: qIndex < 3 ? 'linear-gradient(135deg, #6366f1, #4f46e5)' : 'linear-gradient(135deg, #14b8a6, #0d9488)', color: '#fff', border: 'none', borderRadius: '0.4rem', padding: '0.5rem 1.1rem', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              {qIndex < 3 ? <>Next <ChevronRight size={13} /></> : <>Results <ChevronRight size={13} /></>}
-            </button>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-            <button onClick={() => setPhase('select')} style={{ background: 'transparent', border: '1px solid #1e2433', borderRadius: '0.4rem', padding: '0.4rem 0.8rem', color: '#334155', fontSize: '0.78rem', cursor: 'pointer' }}>Exit</button>
-            <button onClick={submitQuestion} disabled={!currentPick}
-              style={{ background: currentPick ? 'linear-gradient(135deg, #6366f1, #4f46e5)' : '#1a1f2e', color: currentPick ? '#fff' : '#334155', border: 'none', borderRadius: '0.4rem', padding: '0.4rem 1rem', fontSize: '0.8rem', fontWeight: 700, cursor: currentPick ? 'pointer' : 'not-allowed' }}>
-              Submit
-            </button>
-          </div>
-        )}
       </div>
     );
   }
