@@ -416,10 +416,12 @@ export default function CARSPage() {
     const questionIsCorrect = currentPick === currentQ.correct_label;
     const correctAns = currentQ.answers.find(a => a.is_correct)!;
 
+    const COL_HEIGHT = 'calc(100vh - 44px)';
+
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
         {/* Top bar */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.65rem 1.25rem', borderBottom: '1px solid #1e2433', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.6rem 1.25rem', borderBottom: '1px solid #1e2433', height: 44, boxSizing: 'border-box' }}>
           <div style={{ display: 'flex', gap: '0.35rem' }}>
             {[0, 1, 2, 3].map(i => (
               <div key={i} style={{ width: 8, height: 8, borderRadius: '50%', background: submitted[i] ? (picks[i] === questions[i]?.correct_label ? '#22c55e' : '#ef4444') : i === qIndex ? '#6366f1' : '#1e2433', border: i === qIndex ? '2px solid #6366f1' : '1px solid #2d3748' }} />
@@ -434,7 +436,7 @@ export default function CARSPage() {
         </div>
 
         {/* Two-column body */}
-        <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+        <div style={{ display: 'flex', height: COL_HEIGHT }}>
 
           {/* LEFT — passage */}
           <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem 1.5rem', borderRight: '1px solid #1e2433' }}>
@@ -447,14 +449,14 @@ export default function CARSPage() {
           </div>
 
           {/* RIGHT — question + answers */}
-          <div style={{ width: 420, flexShrink: 0, overflowY: 'auto', padding: '1.25rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <div style={{ width: 400, flexShrink: 0, overflowY: 'auto', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', background: '#0a0e17' }}>
             <p style={{ margin: 0, color: '#e2e8f0', fontSize: '0.9rem', fontWeight: 600, lineHeight: 1.65 }}>{currentQ.original.stem}</p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
               {currentQ.answers.map(a => {
                 const sel = currentPick === a.label;
                 let borderColor = sel ? '#6366f1' : '#1e2433';
-                let bg = sel ? 'rgba(99,102,241,0.1)' : '#0a0e17';
+                let bg = sel ? 'rgba(99,102,241,0.12)' : 'transparent';
                 let textColor = sel ? '#e2e8f0' : '#64748b';
                 if (isSubmitted) {
                   if (a.is_correct) { borderColor = '#22c55e'; bg = 'rgba(34,197,94,0.08)'; textColor = '#e2e8f0'; }
@@ -476,7 +478,7 @@ export default function CARSPage() {
                   {questionIsCorrect ? <CheckCircle size={14} color="#22c55e" /> : <XCircle size={14} color="#ef4444" />}
                   <span style={{ fontWeight: 700, fontSize: '0.8rem', color: questionIsCorrect ? '#22c55e' : '#ef4444' }}>{questionIsCorrect ? 'Correct' : `Incorrect · ${correctAns.label} was right`}</span>
                 </div>
-                <div style={{ padding: '0.6rem 0.85rem', background: '#0a0e17', borderRadius: '0.45rem', borderLeft: `3px solid ${questionIsCorrect ? '#22c55e55' : '#ef444455'}` }}>
+                <div style={{ padding: '0.6rem 0.85rem', background: '#12161f', borderRadius: '0.45rem', borderLeft: `3px solid ${questionIsCorrect ? '#22c55e55' : '#ef444455'}` }}>
                   <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#22c55e', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.2rem' }}>Why {correctAns.label} is correct</div>
                   <div style={{ fontSize: '0.77rem', color: '#94a3b8', lineHeight: 1.6 }}>
                     <span style={{ fontWeight: 700, color: '#e2e8f0' }}>{correctAns.text} — </span>
