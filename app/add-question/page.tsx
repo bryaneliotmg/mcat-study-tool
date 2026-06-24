@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useRef } from "react";
-import { Upload, Type, Clipboard, Sparkles, CheckCircle } from "lucide-react";
-import { createQuestion } from "@/lib/db";
+import { Upload, Type, Clipboard, Sparkles, CheckCircle, Brain } from "lucide-react";
 import type { Subject as DBSubject } from "@/lib/db";
 
 type Tab = "type" | "photo" | "paste";
@@ -24,12 +23,18 @@ export default function AddQuestionPage() {
   const [notes, setNotes] = useState("");
   const [pasteText, setPasteText] = useState("");
   const [extractedConcept, setExtractedConcept] = useState("");
+  const [extracting, setExtracting] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [showToast, setShowToast] = useState(false);
-  const [extracting, setExtracting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [analysis, setAnalysis] = useState<{
+    concept_name: string;
+    aamc_category: string;
+    gap_analysis: string;
+    priority: string;
+  } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function handleSubmit() {
@@ -38,17 +43,24 @@ export default function AddQuestionPage() {
       activeTab === "paste" ? pasteText.trim() :
       uploadedFile?.name ?? "";
 
+    if (!rawText || !subject) {
+      setSubmitError("Please enter a question and select a subject.");
+      return;
+    }
+
     setSubmitError("");
+    setAnalysis(null);
     setSubmitting(true);
     try {
-      await createQuestion({
-        raw_text: rawText,
-        input_method: activeTab === "photo" ? "photo" : activeTab === "paste" ? "paste" : "type",
-        subject: subject !== "" ? (subject as DBSubject) : null,
-        notes: notes.trim() || null,
-        concept_id: null,
+      const res = await fetch("/api/analyze-question", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ raw_text: rawText, subject, notes: notes.trim() || null }),
       });
-      // Reset form
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Server error");
+
+      setAnalysis(data.analysis);
       setQuestion("");
       setSubject("");
       setNotes("");
@@ -57,9 +69,9 @@ export default function AddQuestionPage() {
       setUploadedFile(null);
       setActiveTab("type");
       setShowToast(true);
-      setTimeout(() => setShowToast(false), 3000);
+      setTimeout(() => setShowToast(false), 4000);
     } catch (err) {
-      setSubmitError("Failed to save question. Please try again.");
+      setSubmitError("Failed to analyze question. Please try again.");
       console.error(err);
     } finally {
       setSubmitting(false);
@@ -68,11 +80,8 @@ export default function AddQuestionPage() {
 
   function handleExtract() {
     if (!pasteText.trim()) return;
-    setExtracting(true);
-    setTimeout(() => {
-      setExtractedConcept("Oxidative Phosphorylation — Electron Transport Chain");
-      setExtracting(false);
-    }, 1200);
+    // Trigger full analysis inline
+    setExtractedConcept("Ready — click Analyze & Add to Queue to process.");
   }
 
   function handleDrop(e: React.DragEvent) {
@@ -354,6 +363,50 @@ export default function AddQuestionPage() {
       {showToast && (
         <div className="toast">
           ✓ Concept added to your study queue!
+        </div>
+      )}
+
+      {analysis && (
+        <div
+          style={{
+            marginTop: "1.25rem",
+            background: "rgba(99,102,241,0.08)",
+            border: "1px solid rgba(99,102,241,0.3)",
+            borderRadius: "0.75rem",
+            padding: "1.1rem 1.25rem",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
+            <Brain size={16} color="#818cf8" />
+            <span style={{ fontWeight: 700, fontSize: "0.85rem", color: "#818cf8" }}>AI Analysis</span>
+            <span
+              style={{
+                marginLeft: "auto",
+                fontSize: "0.7rem",
+                fontWeight: 700,
+                padding: "2px 8px",
+                borderRadius: 999,
+                background: analysis.priority === "critical" ? "rgba(239,68,68,0.2)" :
+                  analysis.priority === "high" ? "rgba(249,115,22,0.2)" :
+                  analysis.priority === "medium" ? "rgba(234,179,8,0.2)" : "rgba(34,197,94,0.2)",
+                color: analysis.priority === "critical" ? "#ef4444" :
+                  analysis.priority === "high" ? "#f97316" :
+                  analysis.priority === "medium" ? "#eab308" : "#22c55e",
+                textTransform: "capitalize",
+              }}
+            >
+              {analysis.priority} priority
+            </span>
+          </div>
+          <div style={{ fontWeight: 800, color: "#e2e8f0", fontSize: "0.95rem", marginBottom: "0.35rem" }}>
+            {analysis.concept_name}
+          </div>
+          <div style={{ fontSize: "0.75rem", color: "#6366f1", fontWeight: 700, marginBottom: "0.6rem" }}>
+            AAMC {analysis.aamc_category}
+          </div>
+          <p style={{ margin: 0, fontSize: "0.82rem", color: "#94a3b8", lineHeight: 1.65 }}>
+            {analysis.gap_analysis}
+          </p>
         </div>
       )}
     </div>
