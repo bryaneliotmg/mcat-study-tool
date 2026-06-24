@@ -9,6 +9,7 @@ import {
   PlusCircle,
   Network,
   BookOpen,
+  Dumbbell,
 } from "lucide-react";
 
 const geistSans = Geist({
@@ -24,6 +25,7 @@ const geistMono = Geist_Mono({
 const NAV_ITEMS = [
   { href: "/",                label: "Dashboard",      icon: LayoutDashboard },
   { href: "/add-question",    label: "Add Question",   icon: PlusCircle },
+  { href: "/practice",        label: "Practice",       icon: Dumbbell },
   { href: "/knowledge-graph", label: "Knowledge Graph",icon: Network },
   { href: "/word-clarity",    label: "Word Clarity",   icon: BookOpen },
 ];
