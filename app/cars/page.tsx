@@ -112,6 +112,7 @@ export default function CARSPage() {
   const [passageId, setPassageId] = useState<string | null>(null);
   const [questions, setQuestions] = useState<QuestionState[]>([]);
   const [patternData, setPatternData] = useState<PatternData>(null);
+  const [openQs, setOpenQs] = useState<Set<number>>(new Set([0]));
 
   const [readTimer, setReadTimer] = useState(0);
   const [passageLocked, setPassageLocked] = useState(false);
@@ -617,77 +618,95 @@ export default function CARSPage() {
   // ── HISTORY REVIEW ───────────────────────────────────────────
   if (phase === 'history' && historyPassage) {
     const qs: CARSQuestion[] = historyPassage.questions ?? [];
+    const toggleQ = (i: number) => setOpenQs(prev => {
+      const next = new Set(prev);
+      next.has(i) ? next.delete(i) : next.add(i);
+      return next;
+    });
+
     return (
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
-        {/* Top bar */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.6rem 1.25rem', borderBottom: '1px solid #1e2433', height: 44, boxSizing: 'border-box' }}>
-          <button onClick={() => setPhase('select')} style={{ background: 'transparent', border: '1px solid #1e2433', borderRadius: '0.4rem', padding: '0.25rem 0.65rem', color: '#4a5568', fontSize: '0.72rem', cursor: 'pointer' }}>← Back</button>
-          <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#e2e8f0', textTransform: 'capitalize' }}>{historyPassage.topic_domain}</span>
-          <span style={{ fontSize: '0.68rem', color: '#334155' }}>Difficulty {historyPassage.difficulty_level}/5 · {new Date(historyPassage.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-          {historyPassage.score !== undefined && <span style={{ fontSize: '0.72rem', fontWeight: 700, color: historyPassage.score >= 3 ? '#22c55e' : historyPassage.score >= 2 ? '#eab308' : '#ef4444' }}>{historyPassage.score}/4 correct</span>}
+      <div style={{ padding: '1.5rem 1.75rem', maxWidth: 820, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <button onClick={() => setPhase('select')} style={{ background: 'transparent', border: '1px solid #1e2433', borderRadius: '0.4rem', padding: '0.3rem 0.7rem', color: '#4a5568', fontSize: '0.75rem', cursor: 'pointer' }}>← Back</button>
+          <div>
+            <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#e2e8f0', textTransform: 'capitalize' }}>{historyPassage.topic_domain}</div>
+            <div style={{ fontSize: '0.68rem', color: '#334155', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <span>Difficulty {historyPassage.difficulty_level}/5</span>
+              <span>·</span>
+              <span>{new Date(historyPassage.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+              {historyPassage.score !== undefined && <>
+                <span>·</span>
+                <span style={{ color: historyPassage.score >= 3 ? '#22c55e' : historyPassage.score >= 2 ? '#eab308' : '#ef4444', fontWeight: 700 }}>{historyPassage.score}/4 correct</span>
+              </>}
+            </div>
+          </div>
         </div>
 
-        {/* Two-column body */}
-        <div style={{ display: 'flex', height: 'calc(100vh - 44px)' }}>
-
-          {/* LEFT — passage */}
-          <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem 1.5rem', borderRight: '1px solid #1e2433' }}>
-            <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.85rem' }}>Passage</div>
+        {/* Passage */}
+        <div style={{ background: '#0a0e17', border: '1px solid #1e2433', borderRadius: '0.85rem', overflow: 'hidden' }}>
+          <div style={{ padding: '0.6rem 1.25rem', borderBottom: '1px solid #1e2433' }}>
+            <span style={{ fontSize: '0.62rem', fontWeight: 700, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Passage</span>
+          </div>
+          <div style={{ padding: '1.25rem 1.5rem' }}>
             <Passage text={historyPassage.passage_text} />
           </div>
+        </div>
 
-          {/* RIGHT — questions */}
-          <div style={{ width: 460, flexShrink: 0, overflowY: 'auto', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1.25rem', background: '#0a0e17' }}>
-            {qs.map((q, i) => {
-              // Assign stable A/B/C/D: correct=A, wrong_a=B, wrong_b=C, wrong_c=D
-              const options: { label: string; text: string; correct: boolean }[] = [
-                { label: 'A', text: q.correct, correct: true },
-                { label: 'B', text: q.wrong_a, correct: false },
-                { label: 'C', text: q.wrong_b, correct: false },
-                { label: 'D', text: q.wrong_c, correct: false },
-              ];
-              return (
-                <div key={i} style={{ border: '1px solid #1e2433', borderRadius: '0.65rem', overflow: 'hidden' }}>
-                  <div style={{ padding: '0.55rem 1rem', borderBottom: '1px solid #1a1f2e', display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#0f1117' }}>
-                    <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#6366f1' }}>Q{i + 1}</span>
-                    <span style={{ fontSize: '0.65rem', color: '#334155', fontWeight: 600 }}>{TYPE_LABELS[q.type] ?? q.type}</span>
-                  </div>
-                  <div style={{ padding: '0.85rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
-                    {/* Full question stem */}
-                    <p style={{ margin: 0, fontSize: '0.845rem', color: '#e2e8f0', fontWeight: 600, lineHeight: 1.65 }}>{q.stem}</p>
+        {/* Accordion questions */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+          {qs.map((q, i) => {
+            const isOpen = openQs.has(i);
+            const options = [
+              { label: 'A', text: q.correct, correct: true },
+              { label: 'B', text: q.wrong_a, correct: false },
+              { label: 'C', text: q.wrong_b, correct: false },
+              { label: 'D', text: q.wrong_c, correct: false },
+            ];
+            return (
+              <div key={i} style={{ border: '1px solid #1e2433', borderRadius: '0.65rem', overflow: 'hidden', background: '#0a0e17' }}>
+                {/* Accordion header — always visible */}
+                <button onClick={() => toggleQ(i)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.65rem', padding: '0.75rem 1rem', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
+                  <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#6366f1', flexShrink: 0 }}>Q{i + 1}</span>
+                  <span style={{ fontSize: '0.65rem', color: '#334155', fontWeight: 700, flexShrink: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{TYPE_LABELS[q.type] ?? q.type}</span>
+                  <span style={{ fontSize: '0.82rem', color: '#94a3b8', flex: 1, lineHeight: 1.4 }}>{q.stem}</span>
+                  <span style={{ color: '#334155', fontSize: '0.75rem', flexShrink: 0, transition: 'transform 0.15s', display: 'inline-block', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>▾</span>
+                </button>
 
-                    {/* All 4 options */}
+                {/* Accordion body */}
+                {isOpen && (
+                  <div style={{ borderTop: '1px solid #1e2433', padding: '0.85rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                     {options.map(opt => (
                       <div key={opt.label} style={{
-                        display: 'flex', gap: '0.6rem', padding: '0.55rem 0.85rem',
+                        display: 'flex', gap: '0.65rem', padding: '0.6rem 0.9rem',
                         background: opt.correct ? 'rgba(34,197,94,0.07)' : 'rgba(239,68,68,0.04)',
-                        border: `1px solid ${opt.correct ? 'rgba(34,197,94,0.3)' : 'rgba(239,68,68,0.15)'}`,
+                        border: `1px solid ${opt.correct ? 'rgba(34,197,94,0.28)' : 'rgba(239,68,68,0.14)'}`,
                         borderRadius: '0.45rem', alignItems: 'flex-start',
                       }}>
-                        <span style={{ fontWeight: 800, fontSize: '0.78rem', flexShrink: 0, color: opt.correct ? '#22c55e' : '#ef4444', minWidth: 16 }}>{opt.label}.</span>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', flex: 1 }}>
-                          <span style={{ fontSize: '0.8rem', color: opt.correct ? '#e2e8f0' : '#64748b', lineHeight: 1.5 }}>{opt.text}</span>
-                          <span style={{ fontSize: '0.68rem', color: opt.correct ? '#22c55e' : '#ef444499', fontWeight: 600 }}>
+                        <span style={{ fontWeight: 800, fontSize: '0.8rem', flexShrink: 0, color: opt.correct ? '#22c55e' : '#ef4444', minWidth: 18 }}>{opt.label}.</span>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: '0.83rem', color: opt.correct ? '#e2e8f0' : '#64748b', lineHeight: 1.55 }}>{opt.text}</div>
+                          <div style={{ fontSize: '0.65rem', fontWeight: 700, color: opt.correct ? '#22c55e' : '#ef444488', marginTop: '0.2rem' }}>
                             {opt.correct ? '✓ Correct answer' : '✗ Incorrect'}
-                          </span>
+                          </div>
                         </div>
                       </div>
                     ))}
-
-                    {/* Explanation */}
-                    <div style={{ marginTop: '0.2rem', padding: '0.65rem 0.9rem', background: '#0f1117', borderRadius: '0.45rem', borderLeft: '3px solid #6366f133' }}>
+                    <div style={{ marginTop: '0.25rem', padding: '0.7rem 0.9rem', background: '#0f1117', borderRadius: '0.45rem', borderLeft: '3px solid #6366f140' }}>
                       <div style={{ fontSize: '0.6rem', fontWeight: 700, color: '#6366f1', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.3rem' }}>Explanation</div>
-                      <div style={{ fontSize: '0.77rem', color: '#94a3b8', lineHeight: 1.7 }}>{q.explanation}</div>
+                      <div style={{ fontSize: '0.78rem', color: '#94a3b8', lineHeight: 1.75 }}>{q.explanation}</div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-            <button onClick={() => setPhase('select')} style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'transparent', border: '1px solid #1e2433', borderRadius: '0.4rem', padding: '0.45rem 0.85rem', color: '#4a5568', fontSize: '0.78rem', cursor: 'pointer' }}>
-              <RotateCcw size={12} /> Back to CARS
-            </button>
-          </div>
+                )}
+              </div>
+            );
+          })}
         </div>
+
+        <button onClick={() => setPhase('select')} style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'transparent', border: '1px solid #1e2433', borderRadius: '0.4rem', padding: '0.45rem 0.85rem', color: '#4a5568', fontSize: '0.78rem', cursor: 'pointer' }}>
+          <RotateCcw size={12} /> Back to CARS
+        </button>
       </div>
     );
   }
