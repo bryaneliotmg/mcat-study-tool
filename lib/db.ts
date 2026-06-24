@@ -13,6 +13,11 @@ export interface Concept {
   kaplan_section: string | null;
   gap_analysis: string | null;
   is_mastered: boolean;
+  aamc_category: string | null;
+  dominant_failure_type: string | null;
+  failure_counts: Record<string, number> | null;
+  review_needed: boolean | null;
+  review_unlocked_at: string | null;
   created_at: string;
   updated_at: string;
 }
