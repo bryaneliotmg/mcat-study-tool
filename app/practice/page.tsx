@@ -72,9 +72,25 @@ export default function PracticePage() {
   // SM-2 next review info after submit
   const [nextReview, setNextReview] = useState<string | null>(null);
 
+  // Kaplan section content drawer
+  const [kaplanContent, setKaplanContent] = useState<{ section_title: string; content: string } | null>(null);
+  const [kaplanLoading, setKaplanLoading] = useState(false);
+
   useEffect(() => {
     getConcepts().then(c => setConcepts(c.filter(x => !x.is_mastered))).catch(() => {});
   }, []);
+
+  async function fetchKaplanSection(chapter: string, section: string | null) {
+    setKaplanLoading(true);
+    setKaplanContent(null);
+    try {
+      const res = await fetch(`/api/kaplan-section?chapter=${encodeURIComponent(chapter)}&section=${encodeURIComponent(section ?? '')}`);
+      const data = await res.json();
+      if (data.content) setKaplanContent(data);
+    } catch { /* silent */ } finally {
+      setKaplanLoading(false);
+    }
+  }
 
   const stopAll = useCallback(() => {
     if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
@@ -511,12 +527,27 @@ export default function PracticePage() {
 
         {/* Kaplan reference */}
         {selectedConcept?.kaplan_chapter && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.7rem 1rem', background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: '0.55rem' }}>
-            <BookOpen size={14} color="#6366f1" />
-            <div>
-              <div style={{ fontSize: '0.65rem', color: '#6366f1', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em' }}>Study from</div>
-              <div style={{ fontSize: '0.8rem', color: '#e2e8f0', fontWeight: 600 }}>{selectedConcept.kaplan_chapter}</div>
-            </div>
+          <div>
+            <button
+              onClick={() => kaplanContent ? setKaplanContent(null) : fetchKaplanSection(selectedConcept.kaplan_chapter!, selectedConcept.kaplan_section)}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.7rem 1rem', background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: kaplanContent ? '0.55rem 0.55rem 0 0' : '0.55rem', width: '100%', cursor: 'pointer', textAlign: 'left' }}
+            >
+              <BookOpen size={14} color="#6366f1" />
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '0.65rem', color: '#6366f1', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em' }}>Study from</div>
+                <div style={{ fontSize: '0.8rem', color: '#e2e8f0', fontWeight: 600 }}>{selectedConcept.kaplan_chapter}{selectedConcept.kaplan_section ? ` — ${selectedConcept.kaplan_section}` : ''}</div>
+              </div>
+              {kaplanLoading
+                ? <span style={{ fontSize: '0.7rem', color: '#6366f1' }}>Loading…</span>
+                : <span style={{ color: '#6366f1', fontSize: '0.75rem' }}>{kaplanContent ? '▲' : '▼'}</span>
+              }
+            </button>
+            {kaplanContent && (
+              <div style={{ border: '1px solid rgba(99,102,241,0.2)', borderTop: 'none', borderRadius: '0 0 0.55rem 0.55rem', padding: '1rem 1.1rem', background: '#0d1018', maxHeight: 420, overflowY: 'auto' }}>
+                <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#6366f1', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.65rem' }}>{kaplanContent.section_title}</div>
+                <div style={{ fontSize: '0.83rem', color: '#94a3b8', lineHeight: 1.75, whiteSpace: 'pre-wrap' }}>{kaplanContent.content}</div>
+              </div>
+            )}
           </div>
         )}
 
