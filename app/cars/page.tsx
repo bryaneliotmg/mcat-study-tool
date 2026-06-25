@@ -645,7 +645,7 @@ export default function CARSPage() {
           </div>
 
           {/* RIGHT — accordion questions */}
-          <div style={{ width: 460, flexShrink: 0, overflowY: 'auto', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.6rem', background: '#0a0e17' }}>
+          <div style={{ width: 460, flexShrink: 0, overflowY: 'auto', padding: '1rem', background: '#0a0e17' }}>
             {qs.map((q, i) => {
               const isOpen = openQs.has(i);
               const options = [
@@ -655,7 +655,7 @@ export default function CARSPage() {
                 { label: 'D', text: q.wrong_c, correct: false },
               ];
               return (
-                <div key={i} style={{ border: '1px solid #1e2433', borderRadius: '0.65rem', overflow: 'hidden' }}>
+                <div key={i} style={{ border: '1px solid #1e2433', borderRadius: '0.65rem', overflow: 'hidden', marginBottom: '0.6rem' }}>
                   {/* Accordion header */}
                   <button onClick={() => toggleQ(i)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.7rem 0.9rem', background: '#0f1117', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
                     <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#6366f1', flexShrink: 0 }}>Q{i + 1}</span>
