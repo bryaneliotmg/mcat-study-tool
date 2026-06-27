@@ -2,7 +2,11 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
-export const flash = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+export const flash     = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+export const flashJson = genAI.getGenerativeModel({
+  model: 'gemini-2.5-flash',
+  generationConfig: { responseMimeType: 'application/json', maxOutputTokens: 8192 },
+});
 
 export function parseJson(text: string) {
   const clean = text.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim();
@@ -12,4 +16,9 @@ export function parseJson(text: string) {
 export async function ask(model: ReturnType<typeof genAI.getGenerativeModel>, prompt: string): Promise<string> {
   const result = await model.generateContent(prompt);
   return result.response.text();
+}
+
+export async function askJson<T = unknown>(prompt: string): Promise<T> {
+  const result = await flashJson.generateContent(prompt);
+  return JSON.parse(result.response.text()) as T;
 }

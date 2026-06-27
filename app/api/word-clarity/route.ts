@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { flash, parseJson, ask } from '@/lib/gemini';
+import { flash, ask, askJson } from '@/lib/gemini';
 
 export async function POST(request: Request) {
   try {
@@ -20,7 +20,7 @@ Output ONLY this JSON:
 
 Include 1-3 definitions covering the most MCAT-relevant senses. The eli5 must be genuinely simple — a child should understand it.`;
 
-    const result = parseJson(await ask(flash, prompt));
+    const result = await askJson<any>(prompt);
     return NextResponse.json(result);
   } catch (err) {
     console.error('word-clarity error:', err);

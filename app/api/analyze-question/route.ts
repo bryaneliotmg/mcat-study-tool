@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { flash, parseJson, ask } from '@/lib/gemini';
+import { flash, ask, askJson } from '@/lib/gemini';
 
 export async function POST(request: Request) {
   try {
@@ -61,7 +61,7 @@ Analyze this question and output ONLY this JSON. For kaplan_book and kaplan_chap
   "difficulty": 3
 }`;
 
-    const analysis = parseJson(await ask(flash, prompt));
+    const analysis = await askJson<any>(prompt);
 
     const { data: existing } = await supabase
       .from('concepts')

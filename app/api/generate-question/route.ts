@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { flash, parseJson, ask } from '@/lib/gemini';
+import { flash, ask, askJson } from '@/lib/gemini';
 
 async function generateSet(params: {
   concept_name: string;
@@ -53,7 +53,8 @@ Output this exact JSON:
 }
 Write exactly 4 questions. Vary question types across: recall, application, reasoning, data_interpretation.`;
 
-  return parseJson(await ask(flash, prompt));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return askJson<any>(prompt);
 }
 
 async function qualityCheck(passage: string, questions: Array<{ stem: string; correct: string; wrong_b: string }>) {
@@ -71,7 +72,7 @@ Rate each:
 Output ONLY this JSON:
 {"memory_only": false, "distractor_quality": 4, "skill_variety": true, "approved": true}`;
 
-  const result = parseJson(await ask(flash, prompt));
+  const result = await askJson<{ memory_only: boolean; distractor_quality: number; skill_variety: boolean; approved: boolean }>(prompt);
   result.approved = !result.memory_only && result.distractor_quality >= 3 && result.skill_variety;
   return result;
 }

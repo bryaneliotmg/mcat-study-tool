@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { flash, parseJson, ask } from '@/lib/gemini';
+import { flash, ask, askJson } from '@/lib/gemini';
 
 export async function POST(request: Request) {
   try {
@@ -29,7 +29,7 @@ Output ONLY this JSON:
   "recommended_action": "One sentence on what she should do next"
 }`;
 
-    const result = parseJson(await ask(flash, prompt));
+    const result = await askJson<any>(prompt);
     return NextResponse.json({ question_id, ...result });
   } catch (err) {
     console.error('classify-failure error:', err);

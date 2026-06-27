@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { flash, parseJson, ask } from '@/lib/gemini';
+import { flash, ask, askJson } from '@/lib/gemini';
 
 const DOMAINS = [
   'philosophy of mind',
@@ -53,7 +53,7 @@ Write exactly 4 questions covering these types in order:
 3. Inference (what can be concluded)
 4. Strengthen/weaken or function of a specific paragraph`;
 
-    const generated = parseJson(await ask(flash, prompt));
+    const generated = await askJson<any>(prompt);
 
     const { data: saved } = await supabase
       .from('cars_passages')
