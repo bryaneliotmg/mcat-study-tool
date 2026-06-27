@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { flash } from '@/lib/gemini';
+import { flash, ask } from '@/lib/gemini';
 
 export async function POST(req: Request) {
   const { message, context, history } = await req.json();
@@ -22,7 +22,7 @@ ${historyText ? `Prior conversation:\n${historyText}\n` : ''}Student: ${message}
 Tutor:`;
 
   try {
-    const result = await flash(fullPrompt);
+    const result = await ask(flash, fullPrompt);
     return NextResponse.json({ reply: result });
   } catch (e) {
     console.error(e);
