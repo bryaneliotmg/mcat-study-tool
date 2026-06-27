@@ -113,10 +113,11 @@ export async function POST(request: Request) {
 
     const passageId = passageRow?.id ?? null;
 
+    console.log('[generate-question] generated.questions count:', generated.questions?.length);
     const savedQuestions = [];
     for (const q of generated.questions) {
       const { answers, correct_label } = shuffleAnswers(q);
-      const { data: saved } = await supabase.from('questions').insert({
+      const { data: saved, error: insertErr } = await supabase.from('questions').insert({
         concept_id: concept_id ?? null,
         raw_text: q.stem,
         input_method: 'generated',
@@ -141,6 +142,7 @@ export async function POST(request: Request) {
         aamc_category,
       }).select().single();
 
+      if (insertErr) console.error('[generate-question] insert error:', insertErr.message);
       if (saved) {
         savedQuestions.push({ question: saved, answers, correct_label, explanations: { why_correct: q.why_correct, why_b_wrong: q.why_b_wrong, why_c_wrong: q.why_c_wrong, why_d_wrong: q.why_d_wrong } });
       }

@@ -18,14 +18,13 @@ export async function ask(model: ReturnType<typeof genAI.getGenerativeModel>, pr
   return result.response.text();
 }
 
+function fixJson(raw: string): string {
+  // Strip trailing commas before } or ] — Gemini occasionally outputs these
+  return raw.replace(/,(\s*[}\]])/g, '$1');
+}
+
 export async function askJson<T = unknown>(prompt: string): Promise<T> {
   const result = await flashJson.generateContent(prompt);
   const raw = result.response.text();
-  try {
-    return JSON.parse(raw) as T;
-  } catch (e) {
-    console.error('[askJson] Parse failed. Raw response (first 500 chars):', raw.slice(0, 500));
-    console.error('[askJson] Error:', e);
-    throw e;
-  }
+  return JSON.parse(fixJson(raw)) as T;
 }
