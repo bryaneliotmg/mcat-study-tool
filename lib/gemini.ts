@@ -5,7 +5,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 export const flash     = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 export const flashJson = genAI.getGenerativeModel({
   model: 'gemini-2.5-flash',
-  generationConfig: { responseMimeType: 'application/json', maxOutputTokens: 8192 },
+  generationConfig: { responseMimeType: 'application/json', maxOutputTokens: 65536 },
 });
 
 export function parseJson(text: string) {
