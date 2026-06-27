@@ -20,5 +20,12 @@ export async function ask(model: ReturnType<typeof genAI.getGenerativeModel>, pr
 
 export async function askJson<T = unknown>(prompt: string): Promise<T> {
   const result = await flashJson.generateContent(prompt);
-  return JSON.parse(result.response.text()) as T;
+  const raw = result.response.text();
+  try {
+    return JSON.parse(raw) as T;
+  } catch (e) {
+    console.error('[askJson] Parse failed. Raw response (first 500 chars):', raw.slice(0, 500));
+    console.error('[askJson] Error:', e);
+    throw e;
+  }
 }
