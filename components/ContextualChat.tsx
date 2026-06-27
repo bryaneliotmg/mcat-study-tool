@@ -123,7 +123,7 @@ export default function ContextualChat() {
       {!open && (
         <button
           onClick={() => { setContext(''); setContextLabel(''); setMessages([]); setOpen(true); }}
-          title="Ask Claude"
+          title="MCAT Tutor"
           style={{
             position: 'fixed', bottom: '1.5rem', right: '1.5rem', zIndex: 900,
             width: 48, height: 48, borderRadius: '50%',
@@ -163,7 +163,7 @@ export default function ContextualChat() {
             onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
           >
             <MessageCircle size={14} color="#818cf8" />
-            Ask Claude about this
+            MCAT Tutor about this
           </button>
         </div>
       )}
@@ -188,7 +188,7 @@ export default function ContextualChat() {
               whiteSpace: 'nowrap',
             }}
           >
-            <MessageCircle size={13} /> Ask Claude →
+            <MessageCircle size={13} /> MCAT Tutor →
           </button>
         </div>
       )}
@@ -210,7 +210,7 @@ export default function ContextualChat() {
             }}>
               <div>
                 <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#e2e8f0', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <MessageCircle size={15} color="#818cf8" /> Ask Claude
+                  <MessageCircle size={15} color="#818cf8" /> MCAT Tutor
                 </div>
                 {contextLabel && (
                   <div style={{
