@@ -77,7 +77,7 @@ function Sidebar() {
             <div style={{ fontWeight: 700, fontSize: "0.95rem", color: "#e2e8f0", lineHeight: 1.2 }}>
               MCAT
             </div>
-            <div style={{ fontSize: "0.68rem", color: "#64748b", letterSpacing: "0.05em", textTransform: "uppercase" }}>
+            <div style={{ fontSize: "0.68rem", color: "#8899aa", letterSpacing: "0.05em", textTransform: "uppercase" }}>
               Study Tool
             </div>
           </div>
@@ -103,7 +103,7 @@ function Sidebar() {
                 textDecoration: "none",
                 fontSize: "0.875rem",
                 fontWeight: active ? 600 : 400,
-                color: active ? "#e2e8f0" : "#64748b",
+                color: active ? "#e2e8f0" : "#8899aa",
                 background: active ? "#1e2433" : "transparent",
                 transition: "all 0.15s",
                 position: "relative",
@@ -131,7 +131,7 @@ function Sidebar() {
 
       {/* Footer */}
       <div style={{ padding: "0 1.25rem", borderTop: "1px solid #2d3748", paddingTop: "1rem" }}>
-        <div style={{ fontSize: "0.72rem", color: "#334155" }}>
+        <div style={{ fontSize: "0.72rem", color: "#8899aa" }}>
           MCAT Study Tool v0.1
         </div>
       </div>

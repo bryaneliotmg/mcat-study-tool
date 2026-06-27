@@ -15,7 +15,7 @@ const PRIORITY_GLOW: Record<string, string> = {
   critical: '#ef4444',
   high:     '#f97316',
   medium:   '#eab308',
-  low:      '#334155',
+  low:      '#8899aa',
 };
 
 export default function MiniGraph({ concepts }: { concepts: Concept[] }) {
@@ -44,7 +44,7 @@ export default function MiniGraph({ concepts }: { concepts: Concept[] }) {
             selector: 'node',
             style: {
               'background-color': (ele: cytoscape.NodeSingular) =>
-                SUBJECT_COLORS[ele.data('subject')] ?? '#334155',
+                SUBJECT_COLORS[ele.data('subject')] ?? '#8899aa',
               'background-opacity': 0.8,
               'border-color': (ele: cytoscape.NodeSingular) =>
                 PRIORITY_GLOW[ele.data('priority')] ?? '#1e2433',
@@ -57,7 +57,7 @@ export default function MiniGraph({ concepts }: { concepts: Concept[] }) {
               label: 'data(label)',
               'text-valign': 'bottom',
               'text-halign': 'center',
-              color: '#4a5568',
+              color: '#7a8fa3',
               'font-size': 8,
               'font-weight': 500,
               'text-margin-y': 3,
@@ -109,7 +109,7 @@ export default function MiniGraph({ concepts }: { concepts: Concept[] }) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', flexDirection: 'column', gap: '0.5rem' }}>
         <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#1a1f2e', border: '1px dashed #2d3748' }} />
-        <span style={{ fontSize: '0.75rem', color: '#334155' }}>No concepts yet</span>
+        <span style={{ fontSize: '0.75rem', color: '#8899aa' }}>No concepts yet</span>
       </div>
     );
   }

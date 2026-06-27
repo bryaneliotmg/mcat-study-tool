@@ -21,7 +21,7 @@ const FAILURE_META: Record<string, { color: string; icon: React.ReactNode; label
   REASONING_GAP:   { color: "#f97316", icon: <Zap size={15} />,           label: "Reasoning Gap",   tip: "You know the material but applied it incorrectly. Work more practice problems on this topic." },
   PASSAGE_MISREAD: { color: "#eab308", icon: <Eye size={15} />,           label: "Passage Misread", tip: "Your reasoning was sound — slow down and re-read key passage details before answering." },
   TIME_PRESSURE:   { color: "#a78bfa", icon: <Timer size={15} />,         label: "Time Pressure",   tip: "Incomplete reasoning under time pressure. Practice timed sets to build speed." },
-  CARELESS:        { color: "#64748b", icon: <AlertTriangle size={15} />, label: "Careless Error",  tip: "You knew the answer. Double-check before submitting next time." },
+  CARELESS:        { color: "#8899aa", icon: <AlertTriangle size={15} />, label: "Careless Error",  tip: "You knew the answer. Double-check before submitting next time." },
 };
 
 type AnalysisResult = {
@@ -151,7 +151,7 @@ export default function AddQuestionPage() {
         <h1 style={{ margin: 0, fontSize: "1.6rem", fontWeight: 800, color: "#e2e8f0", letterSpacing: "-0.02em" }}>
           Add Missed Question
         </h1>
-        <p style={{ margin: "0.4rem 0 0", color: "#64748b", fontSize: "0.875rem" }}>
+        <p style={{ margin: "0.4rem 0 0", color: "#8899aa", fontSize: "0.875rem" }}>
           Log a question you missed. Claude will identify the concept, map it to Kaplan, and diagnose exactly why you got it wrong.
         </p>
       </div>
@@ -161,7 +161,7 @@ export default function AddQuestionPage() {
         <div style={{ display: "flex", borderBottom: "1px solid #2d3748" }}>
           {tabs.map(tab => (
             <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-              style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.4rem", padding: "0.85rem 1rem", background: "transparent", border: "none", borderBottom: activeTab === tab.id ? "2px solid #6366f1" : "2px solid transparent", color: activeTab === tab.id ? "#e2e8f0" : "#64748b", fontWeight: activeTab === tab.id ? 700 : 400, fontSize: "0.875rem", cursor: "pointer", transition: "all 0.15s" }}>
+              style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.4rem", padding: "0.85rem 1rem", background: "transparent", border: "none", borderBottom: activeTab === tab.id ? "2px solid #6366f1" : "2px solid transparent", color: activeTab === tab.id ? "#e2e8f0" : "#8899aa", fontWeight: activeTab === tab.id ? 700 : 400, fontSize: "0.875rem", cursor: "pointer", transition: "all 0.15s" }}>
               {tab.icon}{tab.label}
             </button>
           ))}
@@ -177,7 +177,7 @@ export default function AddQuestionPage() {
                 const selected = subject === s;
                 return (
                   <button key={s} onClick={() => setSubject(selected ? "" : s)}
-                    style={{ padding: "0.35rem 0.9rem", borderRadius: 999, border: `1px solid ${selected ? meta.color : "#2d3748"}`, background: selected ? meta.bg : "transparent", color: selected ? meta.color : "#64748b", fontWeight: 700, fontSize: "0.8rem", cursor: "pointer", transition: "all 0.15s" }}>
+                    style={{ padding: "0.35rem 0.9rem", borderRadius: 999, border: `1px solid ${selected ? meta.color : "#2d3748"}`, background: selected ? meta.bg : "transparent", color: selected ? meta.color : "#8899aa", fontWeight: 700, fontSize: "0.8rem", cursor: "pointer", transition: "all 0.15s" }}>
                     {s}
                   </button>
                 );
@@ -210,13 +210,13 @@ export default function AddQuestionPage() {
                   <div>
                     <CheckCircle size={32} color="#22c55e" style={{ marginBottom: "0.75rem" }} />
                     <div style={{ color: "#22c55e", fontWeight: 700, fontSize: "0.9rem" }}>{uploadedFile.name}</div>
-                    <div style={{ color: "#64748b", fontSize: "0.75rem", marginTop: "0.25rem" }}>{(uploadedFile.size / 1024).toFixed(0)} KB · Click to replace</div>
+                    <div style={{ color: "#8899aa", fontSize: "0.75rem", marginTop: "0.25rem" }}>{(uploadedFile.size / 1024).toFixed(0)} KB · Click to replace</div>
                   </div>
                 ) : (
                   <div>
-                    <Upload size={32} color="#4a5568" style={{ marginBottom: "0.75rem" }} />
+                    <Upload size={32} color="#7a8fa3" style={{ marginBottom: "0.75rem" }} />
                     <div style={{ color: "#94a3b8", fontWeight: 600, fontSize: "0.9rem" }}>Drop an image here or click to upload</div>
-                    <div style={{ color: "#4a5568", fontSize: "0.78rem", marginTop: "0.35rem" }}>PNG, JPG, HEIC · Photo of your test, textbook, or notes</div>
+                    <div style={{ color: "#7a8fa3", fontSize: "0.78rem", marginTop: "0.35rem" }}>PNG, JPG, HEIC · Photo of your test, textbook, or notes</div>
                   </div>
                 )}
               </div>
@@ -234,7 +234,7 @@ export default function AddQuestionPage() {
                   style={{ resize: "vertical", lineHeight: 1.6, fontFamily: "ui-monospace, monospace", fontSize: "0.82rem" }} />
               </div>
               <button onClick={handleExtract} disabled={!pasteText.trim() || extracting}
-                style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", alignSelf: "flex-start", background: pasteText.trim() ? "rgba(99,102,241,0.2)" : "rgba(255,255,255,0.05)", color: pasteText.trim() ? "#818cf8" : "#4a5568", border: `1px solid ${pasteText.trim() ? "rgba(99,102,241,0.4)" : "#2d3748"}`, borderRadius: "0.45rem", padding: "0.45rem 1rem", fontSize: "0.8rem", fontWeight: 700, cursor: pasteText.trim() ? "pointer" : "not-allowed", transition: "all 0.15s" }}>
+                style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", alignSelf: "flex-start", background: pasteText.trim() ? "rgba(99,102,241,0.2)" : "rgba(255,255,255,0.05)", color: pasteText.trim() ? "#818cf8" : "#7a8fa3", border: `1px solid ${pasteText.trim() ? "rgba(99,102,241,0.4)" : "#2d3748"}`, borderRadius: "0.45rem", padding: "0.45rem 1rem", fontSize: "0.8rem", fontWeight: 700, cursor: pasteText.trim() ? "pointer" : "not-allowed", transition: "all 0.15s" }}>
                 <Sparkles size={14} />{extracting ? "Extracting..." : "Preview"}
               </button>
               {extractedConcept && (
@@ -248,9 +248,9 @@ export default function AddQuestionPage() {
 
           {/* ── WHAT DID YOU ANSWER? ── always visible ── */}
           <div style={{ borderTop: "1px solid #2d3748", paddingTop: "1.25rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
-            <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "#4a5568", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+            <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "#7a8fa3", textTransform: "uppercase", letterSpacing: "0.08em" }}>
               Why You Got It Wrong
-              <span style={{ color: "#334155", fontWeight: 400, textTransform: "none", letterSpacing: 0 }}> — helps Claude diagnose your mistake</span>
+              <span style={{ color: "#8899aa", fontWeight: 400, textTransform: "none", letterSpacing: 0 }}> — helps Claude diagnose your mistake</span>
             </div>
 
             <div>
@@ -276,7 +276,7 @@ export default function AddQuestionPage() {
 
           {/* Submit */}
           <div style={{ borderTop: "1px solid #2d3748", paddingTop: "1.25rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <span style={{ fontSize: "0.78rem", color: submitError ? "#ef4444" : "#4a5568" }}>
+            <span style={{ fontSize: "0.78rem", color: submitError ? "#ef4444" : "#7a8fa3" }}>
               {submitError || "Added to your study queue and diagnosed immediately."}
             </span>
             <button onClick={handleSubmit} disabled={submitting}

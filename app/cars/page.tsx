@@ -277,7 +277,7 @@ export default function CARSPage() {
             <BookOpen size={20} color="#6366f1" />
             <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800, color: '#e2e8f0', letterSpacing: '-0.02em' }}>CARS Practice</h1>
           </div>
-          <p style={{ margin: 0, color: '#4a5568', fontSize: '0.82rem', lineHeight: 1.6 }}>
+          <p style={{ margin: 0, color: '#7a8fa3', fontSize: '0.82rem', lineHeight: 1.6 }}>
             Critical Analysis and Reasoning Skills · 30% of your MCAT score · Pure reading comprehension — no science knowledge required
           </p>
         </div>
@@ -296,7 +296,7 @@ export default function CARSPage() {
                 <span style={{ fontSize: '1rem' }}>{icon}</span>
                 <div>
                   <div style={{ fontWeight: 700, color: '#94a3b8', fontSize: '0.8rem' }}>{title}</div>
-                  <div style={{ color: '#4a5568', fontSize: '0.75rem', marginTop: '0.1rem' }}>{desc}</div>
+                  <div style={{ color: '#7a8fa3', fontSize: '0.75rem', marginTop: '0.1rem' }}>{desc}</div>
                 </div>
               </div>
             ))}
@@ -304,11 +304,11 @@ export default function CARSPage() {
 
           {/* Difficulty */}
           <div>
-            <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.5rem' }}>Difficulty</div>
+            <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#8899aa', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.5rem' }}>Difficulty</div>
             <div style={{ display: 'flex', gap: '0.4rem' }}>
               {[2, 3, 4, 5].map(d => (
                 <button key={d} onClick={() => setDifficulty(d)}
-                  style={{ padding: '0.35rem 0.8rem', borderRadius: 999, border: `1px solid ${difficulty === d ? '#6366f1' : '#2d3748'}`, background: difficulty === d ? 'rgba(99,102,241,0.1)' : 'transparent', color: difficulty === d ? '#818cf8' : '#4a5568', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer' }}>
+                  style={{ padding: '0.35rem 0.8rem', borderRadius: 999, border: `1px solid ${difficulty === d ? '#6366f1' : '#2d3748'}`, background: difficulty === d ? 'rgba(99,102,241,0.1)' : 'transparent', color: difficulty === d ? '#818cf8' : '#7a8fa3', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer' }}>
                   {DIFFICULTY_LABELS[d]}
                 </button>
               ))}
@@ -316,9 +316,9 @@ export default function CARSPage() {
           </div>
 
           <button onClick={handleGenerate} disabled={loading}
-            style={{ background: loading ? '#1a1f2e' : 'linear-gradient(135deg, #6366f1, #4f46e5)', color: loading ? '#334155' : '#fff', border: 'none', borderRadius: '0.5rem', padding: '0.7rem 1.25rem', fontSize: '0.875rem', fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', alignSelf: 'flex-start' }}>
+            style={{ background: loading ? '#1a1f2e' : 'linear-gradient(135deg, #6366f1, #4f46e5)', color: loading ? '#8899aa' : '#fff', border: 'none', borderRadius: '0.5rem', padding: '0.7rem 1.25rem', fontSize: '0.875rem', fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', alignSelf: 'flex-start' }}>
             {loading ? (
-              <><span style={{ width: 14, height: 14, border: '2px solid #334155', borderTop: '2px solid #6366f1', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.8s linear infinite' }} /> Generating passage…</>
+              <><span style={{ width: 14, height: 14, border: '2px solid #8899aa', borderTop: '2px solid #6366f1', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.8s linear infinite' }} /> Generating passage…</>
             ) : (
               <><BookOpen size={15} /> Generate CARS Passage</>
             )}
@@ -328,8 +328,8 @@ export default function CARSPage() {
         {history.length > 0 && (
           <div style={{ marginTop: '1.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
-              <History size={14} color="#4a5568" />
-              <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Past Passages</span>
+              <History size={14} color="#7a8fa3" />
+              <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#8899aa', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Past Passages</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
               {history.map(p => (
@@ -337,7 +337,7 @@ export default function CARSPage() {
                   style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.65rem 1rem', background: '#1a1f2e', border: '1px solid #1e2433', borderRadius: '0.55rem', cursor: 'pointer', textAlign: 'left', width: '100%' }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#94a3b8', textTransform: 'capitalize', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.topic_domain}</div>
-                    <div style={{ fontSize: '0.68rem', color: '#334155', marginTop: '0.15rem' }}>
+                    <div style={{ fontSize: '0.68rem', color: '#8899aa', marginTop: '0.15rem' }}>
                       Difficulty {p.difficulty_level}/5 · {new Date(p.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </div>
                   </div>
@@ -352,7 +352,7 @@ export default function CARSPage() {
             </div>
           </div>
         )}
-        {historyLoading && <div style={{ fontSize: '0.72rem', color: '#334155', marginTop: '1rem', textAlign: 'center' }}>Loading history…</div>}
+        {historyLoading && <div style={{ fontSize: '0.72rem', color: '#8899aa', marginTop: '1rem', textAlign: 'center' }}>Loading history…</div>}
 
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
@@ -372,7 +372,7 @@ export default function CARSPage() {
           <div style={{ flex: 1, height: 4, background: '#1e2433', borderRadius: 2, overflow: 'hidden' }}>
             <div style={{ height: '100%', width: `${(1 - pct) * 100}%`, background: barColor, transition: 'width 1s linear, background 0.3s' }} />
           </div>
-          <span style={{ fontSize: '0.72rem', color: timeLeft < 30 ? '#ef4444' : '#334155', fontVariantNumeric: 'tabular-nums', fontWeight: 700, minWidth: 40 }}>
+          <span style={{ fontSize: '0.72rem', color: timeLeft < 30 ? '#ef4444' : '#8899aa', fontVariantNumeric: 'tabular-nums', fontWeight: 700, minWidth: 40 }}>
             {fmt(timeLeft)}
           </span>
           <button onClick={startAnswering}
@@ -389,7 +389,7 @@ export default function CARSPage() {
 
         <div style={{ background: '#0a0e17', border: '1px solid #1e2433', borderRadius: '0.85rem', overflow: 'hidden' }}>
           <div style={{ padding: '0.65rem 1.25rem', borderBottom: '1px solid #1e2433', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-            <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Passage</span>
+            <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#8899aa', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Passage</span>
             <span style={{ fontSize: '0.65rem', color: '#6366f1', fontWeight: 700, textTransform: 'capitalize' }}>{domain}</span>
             <span style={{ marginLeft: 'auto', fontSize: '0.65rem', color: '#2d3748' }}>Difficulty {difficulty}/5</span>
           </div>
@@ -413,7 +413,7 @@ export default function CARSPage() {
   // ── ANSWERING ─────────────────────────────────────────────────
   if (phase === 'answering' && currentQ) {
     const qTime = qTimers[qIndex] ?? 0;
-    const timerColor = qTime > 120 ? '#ef4444' : qTime > 80 ? '#f97316' : '#4a5568';
+    const timerColor = qTime > 120 ? '#ef4444' : qTime > 80 ? '#f97316' : '#7a8fa3';
     const questionIsCorrect = currentPick === currentQ.correct_label;
     const correctAns = currentQ.answers.find(a => a.is_correct)!;
 
@@ -428,12 +428,12 @@ export default function CARSPage() {
               <div key={i} style={{ width: 8, height: 8, borderRadius: '50%', background: submitted[i] ? (picks[i] === questions[i]?.correct_label ? '#22c55e' : '#ef4444') : i === qIndex ? '#6366f1' : '#1e2433', border: i === qIndex ? '2px solid #6366f1' : '1px solid #2d3748' }} />
             ))}
           </div>
-          <span style={{ fontSize: '0.7rem', color: '#4a5568' }}>Q{qIndex + 1} of 4</span>
+          <span style={{ fontSize: '0.7rem', color: '#7a8fa3' }}>Q{qIndex + 1} of 4</span>
           <span style={{ fontSize: '0.7rem', color: '#6366f1', fontWeight: 700 }}>{TYPE_LABELS[currentQ.original.type] ?? currentQ.original.type}</span>
           <span style={{ marginLeft: 'auto', fontSize: '0.72rem', color: timerColor, fontVariantNumeric: 'tabular-nums', fontWeight: 700 }}>
             <Clock size={12} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 3 }} />{fmt(qTime)}
           </span>
-          <button onClick={() => setPhase('select')} style={{ background: 'transparent', border: '1px solid #1e2433', borderRadius: '0.35rem', padding: '0.2rem 0.6rem', color: '#334155', cursor: 'pointer', fontSize: '0.65rem' }}>Exit</button>
+          <button onClick={() => setPhase('select')} style={{ background: 'transparent', border: '1px solid #1e2433', borderRadius: '0.35rem', padding: '0.2rem 0.6rem', color: '#8899aa', cursor: 'pointer', fontSize: '0.65rem' }}>Exit</button>
         </div>
 
         {/* Two-column body */}
@@ -442,7 +442,7 @@ export default function CARSPage() {
           {/* LEFT — passage */}
           <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem 1.5rem', borderRight: '1px solid #1e2433' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.85rem' }}>
-              <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Passage</span>
+              <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#8899aa', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Passage</span>
               <span style={{ fontSize: '0.65rem', color: '#6366f1', fontWeight: 700, textTransform: 'capitalize' }}>{domain}</span>
               <span style={{ marginLeft: 'auto', fontSize: '0.65rem', color: '#2d3748' }}>{difficulty}/5</span>
             </div>
@@ -458,7 +458,7 @@ export default function CARSPage() {
                 const sel = currentPick === a.label;
                 let borderColor = sel ? '#6366f1' : '#1e2433';
                 let bg = sel ? 'rgba(99,102,241,0.12)' : 'transparent';
-                let textColor = sel ? '#e2e8f0' : '#64748b';
+                let textColor = sel ? '#e2e8f0' : '#8899aa';
                 if (isSubmitted) {
                   if (a.is_correct) { borderColor = '#22c55e'; bg = 'rgba(34,197,94,0.08)'; textColor = '#e2e8f0'; }
                   else if (sel && !a.is_correct) { borderColor = '#ef4444'; bg = 'rgba(239,68,68,0.08)'; textColor = '#e2e8f0'; }
@@ -493,7 +493,7 @@ export default function CARSPage() {
               </div>
             ) : (
               <button onClick={submitQuestion} disabled={!currentPick}
-                style={{ background: currentPick ? 'linear-gradient(135deg, #6366f1, #4f46e5)' : '#1a1f2e', color: currentPick ? '#fff' : '#334155', border: 'none', borderRadius: '0.4rem', padding: '0.55rem 1rem', fontSize: '0.8rem', fontWeight: 700, cursor: currentPick ? 'pointer' : 'not-allowed', alignSelf: 'flex-end' }}>
+                style={{ background: currentPick ? 'linear-gradient(135deg, #6366f1, #4f46e5)' : '#1a1f2e', color: currentPick ? '#fff' : '#8899aa', border: 'none', borderRadius: '0.4rem', padding: '0.55rem 1rem', fontSize: '0.8rem', fontWeight: 700, cursor: currentPick ? 'pointer' : 'not-allowed', alignSelf: 'flex-end' }}>
                 Submit Answer
               </button>
             )}
@@ -514,13 +514,13 @@ export default function CARSPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', padding: '1.25rem 1.5rem', background: '#0a0e17', border: '1px solid #1e2433', borderRadius: '0.85rem' }}>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: '2.5rem', fontWeight: 800, color: score >= 3 ? '#22c55e' : score >= 2 ? '#eab308' : '#ef4444', lineHeight: 1 }}>{score}/4</div>
-            <div style={{ fontSize: '0.65rem', color: '#334155', marginTop: '0.2rem' }}>correct</div>
+            <div style={{ fontSize: '0.65rem', color: '#8899aa', marginTop: '0.2rem' }}>correct</div>
           </div>
           <div>
             <div style={{ fontWeight: 700, color: '#e2e8f0', fontSize: '0.9rem' }}>
               {score === 4 ? 'Excellent comprehension' : score === 3 ? 'Strong — one question tripped you up' : score === 2 ? 'Moderate — re-read explanation carefully' : 'Re-read the passage and review each explanation'}
             </div>
-            <div style={{ fontSize: '0.72rem', color: '#334155', marginTop: '0.25rem' }}>
+            <div style={{ fontSize: '0.72rem', color: '#8899aa', marginTop: '0.25rem' }}>
               Total time: {fmt(totalTime)} · Avg per question: {fmt(Math.round(totalTime / 4))}
             </div>
           </div>
@@ -551,7 +551,7 @@ export default function CARSPage() {
             <div style={{ padding: '0.75rem 1.25rem', borderBottom: '1px solid #1e2433', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Zap size={14} color="#eab308" />
               <span style={{ fontWeight: 700, fontSize: '0.875rem', color: '#e2e8f0' }}>Your CARS Pattern</span>
-              <span style={{ marginLeft: 'auto', fontSize: '0.65rem', color: '#334155' }}>{patternData.totalSessions} questions tracked</span>
+              <span style={{ marginLeft: 'auto', fontSize: '0.65rem', color: '#8899aa' }}>{patternData.totalSessions} questions tracked</span>
             </div>
 
             {/* Dominant weakness callout */}
@@ -568,11 +568,11 @@ export default function CARSPage() {
             <div style={{ padding: '0.75rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               {patternData.patterns.map(p => (
                 <div key={p.type} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                  <span style={{ fontSize: '0.72rem', color: p.weak ? '#ef4444' : p.strong ? '#22c55e' : '#64748b', fontWeight: 700, minWidth: 130 }}>{p.label}</span>
+                  <span style={{ fontSize: '0.72rem', color: p.weak ? '#ef4444' : p.strong ? '#22c55e' : '#8899aa', fontWeight: 700, minWidth: 130 }}>{p.label}</span>
                   <div style={{ flex: 1, height: 5, background: '#1e2433', borderRadius: 3, overflow: 'hidden' }}>
                     <div style={{ height: '100%', width: `${p.accuracy}%`, background: p.weak ? '#ef4444' : p.strong ? '#22c55e' : '#6366f1', borderRadius: 3, transition: 'width 0.6s ease' }} />
                   </div>
-                  <span style={{ fontSize: '0.68rem', color: p.weak ? '#ef4444' : p.strong ? '#22c55e' : '#4a5568', fontVariantNumeric: 'tabular-nums', minWidth: 32, textAlign: 'right' }}>{p.accuracy}%</span>
+                  <span style={{ fontSize: '0.68rem', color: p.weak ? '#ef4444' : p.strong ? '#22c55e' : '#7a8fa3', fontVariantNumeric: 'tabular-nums', minWidth: 32, textAlign: 'right' }}>{p.accuracy}%</span>
                   <span style={{ fontSize: '0.65rem', color: '#2d3748', minWidth: 28, textAlign: 'right' }}>n={p.total}</span>
                 </div>
               ))}
@@ -595,7 +595,7 @@ export default function CARSPage() {
                 <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#22c55e', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                   Correct: {q.answers.find(a => a.is_correct)?.text}
                 </div>
-                <div style={{ fontSize: '0.78rem', color: '#64748b', lineHeight: 1.6 }}>
+                <div style={{ fontSize: '0.78rem', color: '#8899aa', lineHeight: 1.6 }}>
                   {q.original.explanation}
                 </div>
               </div>
@@ -604,7 +604,7 @@ export default function CARSPage() {
         })}
 
         <div style={{ display: 'flex', gap: '0.6rem' }}>
-          <button onClick={() => setPhase('select')} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'transparent', border: '1px solid #1e2433', borderRadius: '0.4rem', padding: '0.5rem 0.9rem', color: '#4a5568', fontSize: '0.8rem', cursor: 'pointer' }}>
+          <button onClick={() => setPhase('select')} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'transparent', border: '1px solid #1e2433', borderRadius: '0.4rem', padding: '0.5rem 0.9rem', color: '#7a8fa3', fontSize: '0.8rem', cursor: 'pointer' }}>
             <RotateCcw size={13} /> Select Difficulty
           </button>
           <button onClick={handleGenerate} disabled={loading} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'linear-gradient(135deg, #6366f1, #4f46e5)', border: 'none', borderRadius: '0.4rem', padding: '0.5rem 1.1rem', color: '#fff', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer' }}>
@@ -629,9 +629,9 @@ export default function CARSPage() {
 
         {/* Top bar */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.6rem 1.25rem', borderBottom: '1px solid #1e2433', flexShrink: 0, height: 44, boxSizing: 'border-box' }}>
-          <button onClick={() => setPhase('select')} style={{ background: 'transparent', border: '1px solid #1e2433', borderRadius: '0.4rem', padding: '0.25rem 0.65rem', color: '#4a5568', fontSize: '0.72rem', cursor: 'pointer' }}>← Back</button>
+          <button onClick={() => setPhase('select')} style={{ background: 'transparent', border: '1px solid #1e2433', borderRadius: '0.4rem', padding: '0.25rem 0.65rem', color: '#7a8fa3', fontSize: '0.72rem', cursor: 'pointer' }}>← Back</button>
           <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#e2e8f0', textTransform: 'capitalize' }}>{historyPassage.topic_domain}</span>
-          <span style={{ fontSize: '0.68rem', color: '#334155' }}>Difficulty {historyPassage.difficulty_level}/5 · {new Date(historyPassage.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+          <span style={{ fontSize: '0.68rem', color: '#8899aa' }}>Difficulty {historyPassage.difficulty_level}/5 · {new Date(historyPassage.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
           {historyPassage.score !== undefined && <span style={{ fontSize: '0.72rem', fontWeight: 700, color: historyPassage.score >= 3 ? '#22c55e' : historyPassage.score >= 2 ? '#eab308' : '#ef4444' }}>{historyPassage.score}/4 correct</span>}
         </div>
 
@@ -640,7 +640,7 @@ export default function CARSPage() {
 
           {/* LEFT — passage */}
           <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem 1.5rem', borderRight: '1px solid #1e2433' }}>
-            <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.85rem' }}>Passage</div>
+            <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#8899aa', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.85rem' }}>Passage</div>
             <Passage text={historyPassage.passage_text} />
           </div>
 
@@ -659,9 +659,9 @@ export default function CARSPage() {
                   {/* Accordion header */}
                   <button onClick={() => toggleQ(i)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.7rem 0.9rem', background: '#0f1117', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
                     <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#6366f1', flexShrink: 0 }}>Q{i + 1}</span>
-                    <span style={{ fontSize: '0.62rem', color: '#334155', fontWeight: 700, flexShrink: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{TYPE_LABELS[q.type] ?? q.type}</span>
-                    <span style={{ fontSize: '0.8rem', color: '#64748b', flex: 1, lineHeight: 1.4 }}>{q.stem}</span>
-                    <span style={{ color: '#334155', fontSize: '0.75rem', flexShrink: 0, display: 'inline-block', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.15s' }}>▾</span>
+                    <span style={{ fontSize: '0.62rem', color: '#8899aa', fontWeight: 700, flexShrink: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{TYPE_LABELS[q.type] ?? q.type}</span>
+                    <span style={{ fontSize: '0.8rem', color: '#8899aa', flex: 1, lineHeight: 1.4 }}>{q.stem}</span>
+                    <span style={{ color: '#8899aa', fontSize: '0.75rem', flexShrink: 0, display: 'inline-block', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.15s' }}>▾</span>
                   </button>
 
                   {/* Accordion body */}
@@ -676,7 +676,7 @@ export default function CARSPage() {
                         }}>
                           <span style={{ fontWeight: 800, fontSize: '0.78rem', flexShrink: 0, color: opt.correct ? '#22c55e' : '#ef4444', minWidth: 16 }}>{opt.label}.</span>
                           <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: '0.8rem', color: opt.correct ? '#e2e8f0' : '#64748b', lineHeight: 1.5 }}>{opt.text}</div>
+                            <div style={{ fontSize: '0.8rem', color: opt.correct ? '#e2e8f0' : '#8899aa', lineHeight: 1.5 }}>{opt.text}</div>
                             <div style={{ fontSize: '0.63rem', fontWeight: 700, color: opt.correct ? '#22c55e' : '#ef444488', marginTop: '0.18rem' }}>
                               {opt.correct ? '✓ Correct answer' : '✗ Incorrect'}
                             </div>
@@ -693,7 +693,7 @@ export default function CARSPage() {
               );
             })}
 
-            <button onClick={() => setPhase('select')} style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'transparent', border: '1px solid #1e2433', borderRadius: '0.4rem', padding: '0.4rem 0.8rem', color: '#4a5568', fontSize: '0.75rem', cursor: 'pointer', marginTop: '0.25rem' }}>
+            <button onClick={() => setPhase('select')} style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'transparent', border: '1px solid #1e2433', borderRadius: '0.4rem', padding: '0.4rem 0.8rem', color: '#7a8fa3', fontSize: '0.75rem', cursor: 'pointer', marginTop: '0.25rem' }}>
               <RotateCcw size={12} /> Back to CARS
             </button>
           </div>

@@ -82,7 +82,7 @@ export default function KnowledgeGraphPage() {
               "background-color": (ele: cytoscape.NodeSingular) =>
                 SUBJECT_COLORS[ele.data("subject") as Subject] ?? "#6366f1",
               "border-color": (ele: cytoscape.NodeSingular) =>
-                PRIORITY_COLORS[ele.data("priority") as Priority] ?? "#64748b",
+                PRIORITY_COLORS[ele.data("priority") as Priority] ?? "#8899aa",
               "border-width": 3,
               width: (ele: cytoscape.NodeSingular) => Math.max(40, ele.data("seen") * 12),
               height: (ele: cytoscape.NodeSingular) => Math.max(40, ele.data("seen") * 12),
@@ -110,12 +110,12 @@ export default function KnowledgeGraphPage() {
             style: {
               width: 2,
               "line-color": "#2d3748",
-              "target-arrow-color": "#4a5568",
+              "target-arrow-color": "#7a8fa3",
               "target-arrow-shape": "triangle",
               "curve-style": "bezier",
               label: "data(label)",
               "font-size": 9,
-              color: "#64748b",
+              color: "#8899aa",
               "text-outline-color": "#0f1117",
               "text-outline-width": 2,
             } as cytoscape.Css.Edge,
@@ -188,7 +188,7 @@ export default function KnowledgeGraphPage() {
         }}
       >
         <div>
-          <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.75rem" }}>
+          <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "#8899aa", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.75rem" }}>
             Filter by Subject
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
@@ -209,7 +209,7 @@ export default function KnowledgeGraphPage() {
                     style={{
                       fontSize: "0.8rem",
                       fontWeight: 700,
-                      color: checked ? SUBJECT_COLORS[s] : "#4a5568",
+                      color: checked ? SUBJECT_COLORS[s] : "#7a8fa3",
                       transition: "color 0.15s",
                     }}
                   >
@@ -222,7 +222,7 @@ export default function KnowledgeGraphPage() {
         </div>
 
         <div>
-          <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.75rem" }}>
+          <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "#8899aa", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.75rem" }}>
             Display
           </div>
           <label style={{ display: "flex", alignItems: "center", gap: "0.6rem", cursor: "pointer" }}>
@@ -232,7 +232,7 @@ export default function KnowledgeGraphPage() {
               onChange={() => setShowMastered(p => !p)}
               style={{ accentColor: "#22c55e", width: 14, height: 14 }}
             />
-            <span style={{ fontSize: "0.8rem", color: showMastered ? "#22c55e" : "#4a5568", fontWeight: 600, transition: "color 0.15s" }}>
+            <span style={{ fontSize: "0.8rem", color: showMastered ? "#22c55e" : "#7a8fa3", fontWeight: 600, transition: "color 0.15s" }}>
               Show Mastered
             </span>
           </label>
@@ -240,24 +240,24 @@ export default function KnowledgeGraphPage() {
 
         {/* Legend */}
         <div>
-          <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.75rem" }}>
+          <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "#8899aa", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.75rem" }}>
             Priority Border
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
             {(Object.entries(PRIORITY_COLORS) as [Priority, string][]).map(([p, color]) => (
               <div key={p} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                 <div style={{ width: 10, height: 10, borderRadius: "50%", background: color, flexShrink: 0 }} />
-                <span style={{ fontSize: "0.75rem", color: "#64748b", textTransform: "capitalize" }}>{p}</span>
+                <span style={{ fontSize: "0.75rem", color: "#8899aa", textTransform: "capitalize" }}>{p}</span>
               </div>
             ))}
           </div>
         </div>
 
         <div>
-          <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.5rem" }}>
+          <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "#8899aa", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.5rem" }}>
             Node Size
           </div>
-          <p style={{ fontSize: "0.75rem", color: "#4a5568", margin: 0, lineHeight: 1.5 }}>
+          <p style={{ fontSize: "0.75rem", color: "#7a8fa3", margin: 0, lineHeight: 1.5 }}>
             Larger = more exposures. Scroll to zoom, drag to pan.
           </p>
         </div>
@@ -281,7 +281,7 @@ export default function KnowledgeGraphPage() {
           }}
         >
           <div style={{ fontWeight: 700, fontSize: "0.9rem", color: "#e2e8f0" }}>Knowledge Graph</div>
-          <div style={{ fontSize: "0.72rem", color: "#64748b" }}>{concepts.length} concepts · {edges.length} connections</div>
+          <div style={{ fontSize: "0.72rem", color: "#8899aa" }}>{concepts.length} concepts · {edges.length} connections</div>
         </div>
       </div>
 
@@ -347,7 +347,7 @@ export default function KnowledgeGraphPage() {
             <Detail label="Exposures" value={`${selected.seen_count}×`} />
             {selected.gap_analysis && (
               <div>
-                <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "0.35rem" }}>
+                <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "#8899aa", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "0.35rem" }}>
                   Gap Analysis
                 </div>
                 <p style={{ margin: 0, fontSize: "0.82rem", color: "#94a3b8", lineHeight: 1.6 }}>
@@ -367,7 +367,7 @@ export default function KnowledgeGraphPage() {
               borderRadius: "0.45rem",
               padding: "0.45rem",
               fontSize: "0.78rem",
-              color: "#64748b",
+              color: "#8899aa",
               cursor: "pointer",
             }}
           >
@@ -382,7 +382,7 @@ export default function KnowledgeGraphPage() {
 function Detail({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "0.2rem" }}>
+      <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "#8899aa", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "0.2rem" }}>
         {label}
       </div>
       <div style={{ fontSize: "0.875rem", color: "#e2e8f0", fontWeight: 600 }}>{value}</div>

@@ -168,7 +168,7 @@ export default function WordClarityPage() {
         <h1 style={{ margin: 0, fontSize: "1.6rem", fontWeight: 800, color: "#e2e8f0", letterSpacing: "-0.02em" }}>
           Word Clarity
         </h1>
-        <p style={{ margin: "0.4rem 0 0", color: "#64748b", fontSize: "0.875rem" }}>
+        <p style={{ margin: "0.4rem 0 0", color: "#8899aa", fontSize: "0.875rem" }}>
           Encounter a term you don&apos;t fully own? Define it, contextualize it, and write sentences until it sticks.
         </p>
       </div>
@@ -178,7 +178,7 @@ export default function WordClarityPage() {
         <div style={{ flex: 1, position: "relative" }}>
           <Search
             size={16}
-            color="#4a5568"
+            color="#7a8fa3"
             style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)" }}
           />
           <input
@@ -223,7 +223,7 @@ export default function WordClarityPage() {
             textAlign: "center",
           }}
         >
-          <div style={{ fontSize: "0.875rem", color: "#64748b", marginBottom: "0.75rem" }}>Try one of these:</div>
+          <div style={{ fontSize: "0.875rem", color: "#8899aa", marginBottom: "0.75rem" }}>Try one of these:</div>
           <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", justifyContent: "center" }}>
             {["osmosis", "depolarization", "equilibrium"].map(w => (
               <button
@@ -255,7 +255,7 @@ export default function WordClarityPage() {
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.75rem" }}>
             <div>
               <h2 style={{ margin: 0, fontSize: "1.4rem", fontWeight: 800, color: "#e2e8f0" }}>{activeWord}</h2>
-              <div style={{ fontSize: "0.75rem", color: "#64748b", marginTop: 2 }}>
+              <div style={{ fontSize: "0.75rem", color: "#8899aa", marginTop: 2 }}>
                 {definitions.length} definition{definitions.length !== 1 ? "s" : ""} found
               </div>
             </div>
@@ -334,7 +334,7 @@ export default function WordClarityPage() {
               <span style={{ fontWeight: 700, fontSize: "0.9rem", color: "#e2e8f0" }}>Definition{definitions.length > 1 ? "s" : ""}</span>
             </div>
             {aiLoading && (
-              <div style={{ padding: "1.5rem", textAlign: "center", color: "#4a5568", fontSize: "0.82rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
+              <div style={{ padding: "1.5rem", textAlign: "center", color: "#7a8fa3", fontSize: "0.82rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
                 <span style={{ width: 14, height: 14, border: "2px solid #2d3748", borderTop: "2px solid #6366f1", borderRadius: "50%", display: "inline-block", animation: "spin 0.8s linear infinite" }} />
                 Asking Claude…
               </div>
@@ -408,7 +408,7 @@ export default function WordClarityPage() {
             >
               <div>
                 <div style={{ fontWeight: 700, fontSize: "0.9rem", color: "#e2e8f0" }}>Sentence Practice</div>
-                <div style={{ fontSize: "0.75rem", color: "#64748b", marginTop: 2 }}>
+                <div style={{ fontSize: "0.75rem", color: "#8899aa", marginTop: 2 }}>
                   Write your own sentences to build encoding depth.
                 </div>
               </div>
@@ -444,7 +444,7 @@ export default function WordClarityPage() {
                     style={{
                       fontSize: "0.72rem",
                       fontWeight: 700,
-                      color: "#4a5568",
+                      color: "#7a8fa3",
                       marginTop: "0.65rem",
                       minWidth: 20,
                       textAlign: "right",
@@ -477,7 +477,7 @@ export default function WordClarityPage() {
             >
               <div style={{ padding: "1rem 1.25rem", borderBottom: "1px solid #2d3748" }}>
                 <div style={{ fontWeight: 700, fontSize: "0.9rem", color: "#e2e8f0" }}>Check Alternatives</div>
-                <div style={{ fontSize: "0.75rem", color: "#64748b", marginTop: 2 }}>
+                <div style={{ fontSize: "0.75rem", color: "#8899aa", marginTop: 2 }}>
                   This word has {definitions.length} distinct meanings — write a sentence per definition to disambiguate.
                 </div>
               </div>
@@ -543,7 +543,7 @@ export default function WordClarityPage() {
                 Cleared Words ({cleared.length})
               </span>
             </div>
-            {showCleared ? <ChevronUp size={16} color="#64748b" /> : <ChevronDown size={16} color="#64748b" />}
+            {showCleared ? <ChevronUp size={16} color="#8899aa" /> : <ChevronDown size={16} color="#8899aa" />}
           </button>
 
           {showCleared && (
@@ -565,11 +565,11 @@ export default function WordClarityPage() {
                     <div>
                       <div style={{ fontWeight: 700, fontSize: "0.875rem", color: "#e2e8f0" }}>{item.word}</div>
                       {item.context && (
-                        <div style={{ fontSize: "0.75rem", color: "#64748b", marginTop: 2 }}>{item.context}</div>
+                        <div style={{ fontSize: "0.75rem", color: "#8899aa", marginTop: 2 }}>{item.context}</div>
                       )}
                     </div>
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.35rem", color: "#4a5568", whiteSpace: "nowrap", flexShrink: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.35rem", color: "#7a8fa3", whiteSpace: "nowrap", flexShrink: 0 }}>
                     <Clock size={12} />
                     <span style={{ fontSize: "0.72rem" }}>{item.clearedAt}</span>
                   </div>

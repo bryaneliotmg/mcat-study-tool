@@ -57,7 +57,7 @@ const FAILURE_META: Record<string, { color: string; icon: React.ReactNode; label
   REASONING_GAP:    { color: '#f97316', icon: <Zap size={15} />,           label: 'Reasoning Gap',   tip: 'You know the material — work more passage problems without re-reading your notes first.' },
   PASSAGE_MISREAD:  { color: '#eab308', icon: <Eye size={15} />,           label: 'Passage Misread', tip: 'Slow your reading. Underline the key claim in each paragraph before looking at the questions.' },
   TIME_PRESSURE:    { color: '#a78bfa', icon: <Timer size={15} />,         label: 'Time Pressure',   tip: 'Practice committing to an answer faster. MCAT average is ~1:45 per question.' },
-  CARELESS:         { color: '#64748b', icon: <AlertTriangle size={15} />, label: 'Careless Error',  tip: 'You knew it. Re-read the question stem before submitting next time.' },
+  CARELESS:         { color: '#8899aa', icon: <AlertTriangle size={15} />, label: 'Careless Error',  tip: 'You knew it. Re-read the question stem before submitting next time.' },
 };
 
 const SUBJECTS: Subject[] = ['B/B', 'C/B', 'P/S', 'C/P'];
@@ -325,7 +325,7 @@ export default function PracticePage() {
       <div style={{ padding: '2rem 2.5rem', maxWidth: 680, margin: '0 auto' }}>
         <div style={{ marginBottom: '2rem' }}>
           <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800, color: '#e2e8f0', letterSpacing: '-0.02em' }}>Practice</h1>
-          <p style={{ margin: '0.35rem 0 0', color: '#4a5568', fontSize: '0.825rem' }}>
+          <p style={{ margin: '0.35rem 0 0', color: '#7a8fa3', fontSize: '0.825rem' }}>
             Claude writes a passage + 4 questions. You read the passage, then it hides — answer from memory + reasoning.
           </p>
         </div>
@@ -338,7 +338,7 @@ export default function PracticePage() {
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               {SUBJECTS.map(s => {
                 const m = SUBJECT_META[s]; const sel = selectedSubject === s;
-                return <button key={s} onClick={() => { setSelectedSubject(s); setSelectedConcept(null); }} style={{ padding: '0.35rem 1rem', borderRadius: 999, border: `1px solid ${sel ? m.color : '#2d3748'}`, background: sel ? m.bg : 'transparent', color: sel ? m.color : '#4a5568', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}>{s}</button>;
+                return <button key={s} onClick={() => { setSelectedSubject(s); setSelectedConcept(null); }} style={{ padding: '0.35rem 1rem', borderRadius: 999, border: `1px solid ${sel ? m.color : '#2d3748'}`, background: sel ? m.bg : 'transparent', color: sel ? m.color : '#7a8fa3', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}>{s}</button>;
               })}
             </div>
           </div>
@@ -346,7 +346,7 @@ export default function PracticePage() {
           <div>
             <div style={sLabel}>Focus Concept <span style={{ color: '#2d3748', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>— optional</span></div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', maxHeight: 200, overflowY: 'auto' }}>
-              <button onClick={() => setSelectedConcept(null)} style={{ textAlign: 'left', padding: '0.45rem 0.7rem', borderRadius: '0.4rem', border: `1px solid ${!selectedConcept ? '#6366f1' : '#1e2433'}`, background: !selectedConcept ? 'rgba(99,102,241,0.1)' : 'transparent', color: !selectedConcept ? '#818cf8' : '#4a5568', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}>
+              <button onClick={() => setSelectedConcept(null)} style={{ textAlign: 'left', padding: '0.45rem 0.7rem', borderRadius: '0.4rem', border: `1px solid ${!selectedConcept ? '#6366f1' : '#1e2433'}`, background: !selectedConcept ? 'rgba(99,102,241,0.1)' : 'transparent', color: !selectedConcept ? '#818cf8' : '#7a8fa3', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}>
                 Random from {selectedSubject}
               </button>
               {filteredConcepts.map(c => (
@@ -355,7 +355,7 @@ export default function PracticePage() {
                     {c.review_needed && <Lock size={11} color="#ef4444" />}
                     {c.name}
                   </span>
-                  <span style={{ fontSize: '0.65rem', color: c.priority === 'critical' ? '#ef4444' : c.priority === 'high' ? '#f97316' : '#4a5568', fontWeight: 700 }}>{c.seen_count}× · {c.priority}</span>
+                  <span style={{ fontSize: '0.65rem', color: c.priority === 'critical' ? '#ef4444' : c.priority === 'high' ? '#f97316' : '#7a8fa3', fontWeight: 700 }}>{c.seen_count}× · {c.priority}</span>
                 </button>
               ))}
             </div>
@@ -401,8 +401,8 @@ export default function PracticePage() {
         {(history.length > 0 || historyLoading) && (
           <div style={{ marginTop: '2rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.85rem' }}>
-              <History size={14} color="#334155" />
-              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Past Sessions</span>
+              <History size={14} color="#8899aa" />
+              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#8899aa', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Past Sessions</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
               {history.map(s => {
@@ -420,7 +420,7 @@ export default function PracticePage() {
                       <div style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {s.passage_text.slice(0, 80)}…
                       </div>
-                      <div style={{ fontSize: '0.65rem', color: '#334155', marginTop: '0.2rem' }}>
+                      <div style={{ fontSize: '0.65rem', color: '#8899aa', marginTop: '0.2rem' }}>
                         {new Date(s.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} · {s.questions.length} questions
                       </div>
                     </div>
@@ -429,7 +429,7 @@ export default function PracticePage() {
                   </button>
                 );
               })}
-              {historyLoading && <div style={{ fontSize: '0.72rem', color: '#334155', marginTop: '0.5rem', textAlign: 'center' }}>Loading history…</div>}
+              {historyLoading && <div style={{ fontSize: '0.72rem', color: '#8899aa', marginTop: '0.5rem', textAlign: 'center' }}>Loading history…</div>}
             </div>
           </div>
         )}
@@ -444,7 +444,7 @@ export default function PracticePage() {
         <div style={{ textAlign: 'center' }}>
           <div style={{ width: 44, height: 44, border: '3px solid #1e2433', borderTop: '3px solid #6366f1', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 1rem' }} />
           <div style={{ color: '#94a3b8', fontSize: '0.875rem', fontWeight: 600 }}>Writing passage + 4 questions...</div>
-          <div style={{ color: '#334155', fontSize: '0.75rem', marginTop: '0.3rem' }}>Adapted to your failure pattern · Quality checked</div>
+          <div style={{ color: '#8899aa', fontSize: '0.75rem', marginTop: '0.3rem' }}>Adapted to your failure pattern · Quality checked</div>
         </div>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
@@ -455,7 +455,7 @@ export default function PracticePage() {
   if ((phase === 'answering' || phase === 'classifying') && questionSet && currentQ) {
     const passageTimeLeft = Math.max(0, REVEAL_SECONDS - passageTimer);
     const questionTime = questionTimers[qIndex] ?? 0;
-    const timerColor = questionTime > 120 ? '#ef4444' : questionTime > 80 ? '#f97316' : '#4a5568';
+    const timerColor = questionTime > 120 ? '#ef4444' : questionTime > 80 ? '#f97316' : '#7a8fa3';
     const isSubmitted = submitted[qIndex];
     const myClassification = classifications[qIndex];
     const correctAns = currentQ.answers.find(a => a.is_correct)!;
@@ -470,7 +470,7 @@ export default function PracticePage() {
               <div key={i} style={{ width: 8, height: 8, borderRadius: '50%', background: submitted[i] ? (picks[i] === questionSet.questions[i].correct_label ? '#22c55e' : '#ef4444') : i === qIndex ? '#6366f1' : '#1e2433', border: i === qIndex ? '2px solid #6366f1' : '1px solid #2d3748' }} />
             ))}
           </div>
-          <span style={{ fontSize: '0.72rem', color: '#334155' }}>Q{qIndex + 1} of 4</span>
+          <span style={{ fontSize: '0.72rem', color: '#8899aa' }}>Q{qIndex + 1} of 4</span>
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span style={{ fontSize: '0.72rem', color: timerColor, fontVariantNumeric: 'tabular-nums', fontWeight: 700 }}>
               <Clock size={12} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 3 }} />{fmt(questionTime)}
@@ -480,14 +480,14 @@ export default function PracticePage() {
 
         <div style={{ background: '#0a0e17', border: '1px solid #1e2433', borderRadius: '0.75rem', overflow: 'hidden' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.6rem 1rem', borderBottom: '1px solid #1e2433' }}>
-            <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Passage</span>
+            <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#8899aa', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Passage</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               {!passageHidden && (
-                <span style={{ fontSize: '0.65rem', color: passageTimeLeft < 20 ? '#ef4444' : '#334155', fontVariantNumeric: 'tabular-nums' }}>
+                <span style={{ fontSize: '0.65rem', color: passageTimeLeft < 20 ? '#ef4444' : '#8899aa', fontVariantNumeric: 'tabular-nums' }}>
                   hides in {passageTimeLeft}s
                 </span>
               )}
-              <button onClick={() => setPassageHidden(h => !h)} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', background: 'transparent', border: 'none', color: '#334155', cursor: 'pointer', fontSize: '0.65rem' }}>
+              <button onClick={() => setPassageHidden(h => !h)} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', background: 'transparent', border: 'none', color: '#8899aa', cursor: 'pointer', fontSize: '0.65rem' }}>
                 {passageHidden ? <Eye size={12} /> : <EyeOff size={12} />}
                 {passageHidden ? 'show' : 'hide'}
               </button>
@@ -504,7 +504,7 @@ export default function PracticePage() {
         </div>
 
         <div>
-          <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.5rem' }}>
+          <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#8899aa', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.5rem' }}>
             Question {qIndex + 1} · {currentQ.question.aamc_category || selectedSubject}
           </div>
           <p style={{ margin: 0, color: '#e2e8f0', fontSize: '0.925rem', fontWeight: 600, lineHeight: 1.6 }}>{currentQ.question.raw_text}</p>
@@ -515,7 +515,7 @@ export default function PracticePage() {
             const sel = currentPick === a.label;
             let borderColor = sel ? '#6366f1' : '#1e2433';
             let bg = sel ? 'rgba(99,102,241,0.1)' : '#0a0e17';
-            let textColor = sel ? '#e2e8f0' : '#64748b';
+            let textColor = sel ? '#e2e8f0' : '#8899aa';
             if (isSubmitted) {
               if (a.is_correct) { borderColor = '#22c55e'; bg = 'rgba(34,197,94,0.08)'; textColor = '#e2e8f0'; }
               else if (sel && !a.is_correct) { borderColor = '#ef4444'; bg = 'rgba(239,68,68,0.08)'; textColor = '#e2e8f0'; }
@@ -536,7 +536,7 @@ export default function PracticePage() {
               {questionIsCorrect ? <CheckCircle size={18} color="#22c55e" /> : <XCircle size={18} color="#ef4444" />}
               <div>
                 <div style={{ fontWeight: 700, fontSize: '0.875rem', color: questionIsCorrect ? '#22c55e' : '#ef4444' }}>{questionIsCorrect ? 'Correct' : 'Incorrect'}</div>
-                {!questionIsCorrect && <div style={{ fontSize: '0.72rem', color: '#4a5568' }}>Correct: {correctAns.label}. {correctAns.text.slice(0, 60)}{correctAns.text.length > 60 ? '…' : ''}</div>}
+                {!questionIsCorrect && <div style={{ fontSize: '0.72rem', color: '#7a8fa3' }}>Correct: {correctAns.label}. {correctAns.text.slice(0, 60)}{correctAns.text.length > 60 ? '…' : ''}</div>}
               </div>
               <div style={{ marginLeft: 'auto', fontSize: '0.65rem', color: '#2d3748', fontVariantNumeric: 'tabular-nums' }}>{fmt(questionTimers[qIndex] ?? 0)}</div>
             </div>
@@ -547,7 +547,7 @@ export default function PracticePage() {
                   {fm.icon}<span style={{ fontWeight: 700, fontSize: '0.8rem' }}>{fm.label}</span>
                 </div>
                 <p style={{ margin: '0 0 0.3rem', fontSize: '0.78rem', color: '#94a3b8', lineHeight: 1.55 }}>{myClassification.explanation}</p>
-                <p style={{ margin: 0, fontSize: '0.75rem', color: '#4a5568', fontStyle: 'italic' }}>→ {fm.tip}</p>
+                <p style={{ margin: 0, fontSize: '0.75rem', color: '#7a8fa3', fontStyle: 'italic' }}>→ {fm.tip}</p>
               </div>
             ) : null; })()}
 
@@ -573,9 +573,9 @@ export default function PracticePage() {
               style={{ resize: 'none', lineHeight: 1.55, fontSize: '0.82rem' }}
             />
             <div style={{ display: 'flex', gap: '0.6rem', justifyContent: 'flex-end' }}>
-              <button onClick={() => { stopAll(); setPhase('select'); }} style={{ background: 'transparent', border: '1px solid #1e2433', borderRadius: '0.4rem', padding: '0.45rem 0.85rem', color: '#334155', fontSize: '0.78rem', cursor: 'pointer' }}>Cancel</button>
+              <button onClick={() => { stopAll(); setPhase('select'); }} style={{ background: 'transparent', border: '1px solid #1e2433', borderRadius: '0.4rem', padding: '0.45rem 0.85rem', color: '#8899aa', fontSize: '0.78rem', cursor: 'pointer' }}>Cancel</button>
               <button onClick={handleSubmitQuestion} disabled={!currentPick || phase === 'classifying'}
-                style={{ background: currentPick ? 'linear-gradient(135deg, #6366f1, #4f46e5)' : '#1a1f2e', color: currentPick ? '#fff' : '#334155', border: 'none', borderRadius: '0.4rem', padding: '0.45rem 1.1rem', fontSize: '0.82rem', fontWeight: 700, cursor: currentPick ? 'pointer' : 'not-allowed' }}>
+                style={{ background: currentPick ? 'linear-gradient(135deg, #6366f1, #4f46e5)' : '#1a1f2e', color: currentPick ? '#fff' : '#8899aa', border: 'none', borderRadius: '0.4rem', padding: '0.45rem 1.1rem', fontSize: '0.82rem', fontWeight: 700, cursor: currentPick ? 'pointer' : 'not-allowed' }}>
                 {phase === 'classifying' ? 'Analyzing…' : 'Submit'}
               </button>
             </div>
@@ -595,13 +595,13 @@ export default function PracticePage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', padding: '1.1rem 1.25rem', background: '#0a0e17', border: '1px solid #1e2433', borderRadius: '0.75rem' }}>
           <div style={{ textAlign: 'center', minWidth: 60 }}>
             <div style={{ fontSize: '2rem', fontWeight: 800, color: score >= 3 ? '#22c55e' : score >= 2 ? '#eab308' : '#ef4444', lineHeight: 1 }}>{score}/4</div>
-            <div style={{ fontSize: '0.65rem', color: '#334155', marginTop: '0.2rem' }}>correct</div>
+            <div style={{ fontSize: '0.65rem', color: '#8899aa', marginTop: '0.2rem' }}>correct</div>
           </div>
           <div>
             <div style={{ fontWeight: 700, color: '#e2e8f0', fontSize: '0.9rem' }}>
               {score === 4 ? 'Perfect set — concept is strengthening' : score >= 3 ? 'Strong — one more pass and this concept will be solid' : score >= 2 ? 'Partial understanding — focus on what tripped you up' : 'Knowledge or reasoning gap — open the Kaplan chapter'}
             </div>
-            {nextReview && <div style={{ fontSize: '0.72rem', color: '#334155', marginTop: '0.25rem' }}>Next SM-2 review: {nextReview}</div>}
+            {nextReview && <div style={{ fontSize: '0.72rem', color: '#8899aa', marginTop: '0.25rem' }}>Next SM-2 review: {nextReview}</div>}
           </div>
           <span style={{ marginLeft: 'auto', fontSize: '0.7rem', fontWeight: 700, padding: '3px 10px', borderRadius: 999, background: sm.bg, color: sm.color, border: `1px solid ${sm.color}44` }}>{selectedSubject}</span>
         </div>
@@ -624,7 +624,7 @@ export default function PracticePage() {
                     {fm.icon}{fm.label}: {cl?.explanation}
                   </div>
                 )}
-                <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b', lineHeight: 1.55 }}>
+                <p style={{ margin: 0, fontSize: '0.78rem', color: '#8899aa', lineHeight: 1.55 }}>
                   <span style={{ fontWeight: 700, color: '#22c55e' }}>✓ </span>{q.explanations.why_correct}
                 </p>
               </div>
@@ -658,7 +658,7 @@ export default function PracticePage() {
         )}
 
         <div style={{ display: 'flex', gap: '0.6rem' }}>
-          <button onClick={() => { fetchHistory(); setPhase('select'); }} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'transparent', border: '1px solid #1e2433', borderRadius: '0.4rem', padding: '0.55rem 1rem', color: '#4a5568', fontSize: '0.8rem', cursor: 'pointer' }}>
+          <button onClick={() => { fetchHistory(); setPhase('select'); }} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'transparent', border: '1px solid #1e2433', borderRadius: '0.4rem', padding: '0.55rem 1rem', color: '#7a8fa3', fontSize: '0.8rem', cursor: 'pointer' }}>
             <RotateCcw size={13} /> New Session
           </button>
           <button onClick={handleGenerate} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'linear-gradient(135deg, #6366f1, #4f46e5)', border: 'none', borderRadius: '0.4rem', padding: '0.55rem 1.1rem', color: '#fff', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer' }}>
@@ -683,10 +683,10 @@ export default function PracticePage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem 1.25rem', background: '#0a0e17', border: '1px solid #1e2433', borderRadius: '0.75rem' }}>
           <div style={{ textAlign: 'center', minWidth: 52 }}>
             <div style={{ fontSize: '1.75rem', fontWeight: 800, color: scoreColor, lineHeight: 1 }}>{score}/4</div>
-            <div style={{ fontSize: '0.6rem', color: '#334155', marginTop: '0.2rem' }}>correct</div>
+            <div style={{ fontSize: '0.6rem', color: '#8899aa', marginTop: '0.2rem' }}>correct</div>
           </div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: '0.68rem', color: '#334155', marginBottom: '0.15rem' }}>
+            <div style={{ fontSize: '0.68rem', color: '#8899aa', marginBottom: '0.15rem' }}>
               {new Date(historySession.created_at).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
             </div>
             <div style={{ fontSize: '0.82rem', color: '#94a3b8', lineHeight: 1.5 }}>
@@ -698,7 +698,7 @@ export default function PracticePage() {
 
         {/* Passage */}
         <div style={{ background: '#0a0e17', border: '1px solid #1e2433', borderRadius: '0.65rem', padding: '1rem 1.25rem' }}>
-          <div style={{ fontSize: '0.6rem', fontWeight: 700, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.6rem' }}>Passage</div>
+          <div style={{ fontSize: '0.6rem', fontWeight: 700, color: '#8899aa', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.6rem' }}>Passage</div>
           <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.845rem', lineHeight: 1.75 }}>{historySession.passage_text}</p>
         </div>
 
@@ -726,7 +726,7 @@ export default function PracticePage() {
                   const wasPicked = q.answer_given === a.label;
                   let borderColor = '#1a1f2e';
                   let bg = 'transparent';
-                  let textColor = '#4a5568';
+                  let textColor = '#7a8fa3';
                   if (a.is_correct) { borderColor = '#22c55e44'; bg = 'rgba(34,197,94,0.06)'; textColor = '#e2e8f0'; }
                   else if (wasPicked && !a.is_correct) { borderColor = '#ef444444'; bg = 'rgba(239,68,68,0.06)'; textColor = '#94a3b8'; }
                   return (
@@ -740,7 +740,7 @@ export default function PracticePage() {
                 })}
 
                 {q.explanations?.why_correct && (
-                  <div style={{ marginTop: '0.35rem', fontSize: '0.78rem', color: '#64748b', lineHeight: 1.6, padding: '0.5rem 0.75rem', background: '#060810', borderRadius: '0.4rem', borderLeft: '3px solid #22c55e33' }}>
+                  <div style={{ marginTop: '0.35rem', fontSize: '0.78rem', color: '#8899aa', lineHeight: 1.6, padding: '0.5rem 0.75rem', background: '#060810', borderRadius: '0.4rem', borderLeft: '3px solid #22c55e33' }}>
                     <span style={{ fontWeight: 700, color: '#22c55e', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Why correct: </span>
                     {q.explanations.why_correct}
                   </div>
@@ -751,7 +751,7 @@ export default function PracticePage() {
         })}
 
         <div style={{ display: 'flex', gap: '0.6rem' }}>
-          <button onClick={() => setPhase('select')} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'transparent', border: '1px solid #1e2433', borderRadius: '0.4rem', padding: '0.55rem 1rem', color: '#4a5568', fontSize: '0.8rem', cursor: 'pointer' }}>
+          <button onClick={() => setPhase('select')} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'transparent', border: '1px solid #1e2433', borderRadius: '0.4rem', padding: '0.55rem 1rem', color: '#7a8fa3', fontSize: '0.8rem', cursor: 'pointer' }}>
             <RotateCcw size={13} /> Back
           </button>
           <button onClick={handleGenerate} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'linear-gradient(135deg, #6366f1, #4f46e5)', border: 'none', borderRadius: '0.4rem', padding: '0.55rem 1.1rem', color: '#fff', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer' }}>
@@ -766,6 +766,6 @@ export default function PracticePage() {
 }
 
 const sLabel: React.CSSProperties = {
-  fontSize: '0.68rem', fontWeight: 700, color: '#334155',
+  fontSize: '0.68rem', fontWeight: 700, color: '#8899aa',
   textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.5rem',
 };

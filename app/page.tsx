@@ -48,7 +48,7 @@ function ConceptRow({ concept }: { concept: Concept }) {
           <span style={{ fontSize: "0.68rem", fontWeight: 700, color: sm.color, flexShrink: 0 }}>{concept.subject}</span>
         </div>
         {concept.gap_analysis && (
-          <p style={{ margin: 0, fontSize: "0.75rem", color: "#4a5568", lineHeight: 1.4, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
+          <p style={{ margin: 0, fontSize: "0.75rem", color: "#7a8fa3", lineHeight: 1.4, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
             {concept.gap_analysis}
           </p>
         )}
@@ -58,7 +58,7 @@ function ConceptRow({ concept }: { concept: Concept }) {
         <span style={{ fontSize: "0.65rem", fontWeight: 700, padding: "2px 7px", borderRadius: 999, background: pm.bg, color: pm.color, display: "flex", alignItems: "center", gap: "0.25rem" }}>
           {pm.icon}{pm.label}
         </span>
-        <span style={{ fontSize: "0.65rem", color: "#334155", fontWeight: 500 }}>{freqLabel(concept.seen_count)}</span>
+        <span style={{ fontSize: "0.65rem", color: "#8899aa", fontWeight: 500 }}>{freqLabel(concept.seen_count)}</span>
       </div>
     </div>
   );
@@ -88,7 +88,7 @@ export default function Dashboard() {
           <h1 style={{ margin: 0, fontSize: "1.25rem", fontWeight: 700, color: "#e2e8f0", letterSpacing: "-0.01em" }}>
             {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
           </h1>
-          <p style={{ margin: "0.2rem 0 0", color: "#334155", fontSize: "0.78rem" }}>Study Dashboard</p>
+          <p style={{ margin: "0.2rem 0 0", color: "#8899aa", fontSize: "0.78rem" }}>Study Dashboard</p>
         </div>
         <Link href="/add-question" style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", background: "#1e2433", color: "#818cf8", textDecoration: "none", borderRadius: "0.45rem", padding: "0.45rem 0.9rem", fontSize: "0.8rem", fontWeight: 700, border: "1px solid rgba(99,102,241,0.35)" }}>
           + Add Question
@@ -106,7 +106,7 @@ export default function Dashboard() {
             <span style={{ color: s.color, opacity: 0.8 }}>{s.icon}</span>
             <div>
               <div style={{ fontSize: "1.2rem", fontWeight: 800, color: "#e2e8f0", lineHeight: 1 }}>{s.value}</div>
-              <div style={{ fontSize: "0.65rem", color: "#334155", marginTop: "0.15rem" }}>{s.label}</div>
+              <div style={{ fontSize: "0.65rem", color: "#8899aa", marginTop: "0.15rem" }}>{s.label}</div>
             </div>
           </div>
         ))}
@@ -118,7 +118,7 @@ export default function Dashboard() {
         {/* Left — Study Queue */}
         <div style={{ background: "#0f1117", border: "1px solid #1a1f2e", borderRadius: "0.75rem", display: "flex", flexDirection: "column", overflow: "hidden" }}>
           <div style={{ padding: "0.85rem 1rem", borderBottom: "1px solid #1a1f2e", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "#4a5568", textTransform: "uppercase", letterSpacing: "0.08em" }}>Study Queue</span>
+            <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "#7a8fa3", textTransform: "uppercase", letterSpacing: "0.08em" }}>Study Queue</span>
             <span style={{ fontSize: "0.65rem", color: "#2d3748" }}>{concepts.length} concepts · by priority</span>
           </div>
           <div style={{ flex: 1, overflowY: "auto", padding: "0 1rem" }}>
@@ -146,7 +146,7 @@ export default function Dashboard() {
         {/* Right — Knowledge Graph */}
         <div style={{ background: "#080b12", border: "1px solid #1a1f2e", borderRadius: "0.75rem", display: "flex", flexDirection: "column", overflow: "hidden" }}>
           <div style={{ padding: "0.85rem 1rem", borderBottom: "1px solid #1a1f2e", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "#4a5568", textTransform: "uppercase", letterSpacing: "0.08em" }}>Knowledge Map</span>
+            <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "#7a8fa3", textTransform: "uppercase", letterSpacing: "0.08em" }}>Knowledge Map</span>
             <Link href="/knowledge-graph" style={{ display: "flex", alignItems: "center", gap: "0.3rem", fontSize: "0.65rem", color: "#2d3748", textDecoration: "none", fontWeight: 600 }}>
               <Network size={11} /> Expand
             </Link>
@@ -157,12 +157,12 @@ export default function Dashboard() {
             {(Object.entries(SUBJECT_META) as [Subject, { color: string }][]).map(([s, m]) => (
               <div key={s} style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
                 <div style={{ width: 6, height: 6, borderRadius: "50%", background: m.color }} />
-                <span style={{ fontSize: "0.62rem", color: "#334155", fontWeight: 600 }}>{s}</span>
+                <span style={{ fontSize: "0.62rem", color: "#8899aa", fontWeight: 600 }}>{s}</span>
               </div>
             ))}
             <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "0.3rem" }}>
               <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#ef4444", boxShadow: "0 0 4px #ef4444" }} />
-              <span style={{ fontSize: "0.62rem", color: "#334155" }}>critical</span>
+              <span style={{ fontSize: "0.62rem", color: "#8899aa" }}>critical</span>
             </div>
           </div>
 
@@ -177,7 +177,7 @@ export default function Dashboard() {
           {selectedNode && (
             <div style={{ padding: "0.65rem 1rem", borderTop: "1px solid #1a1f2e", background: "#0a0e17" }}>
               <div style={{ fontWeight: 700, fontSize: "0.78rem", color: "#e2e8f0" }}>{selectedNode.name}</div>
-              <div style={{ fontSize: "0.65rem", color: "#4a5568", marginTop: "0.15rem" }}>{selectedNode.subject} · {selectedNode.seen_count}× seen</div>
+              <div style={{ fontSize: "0.65rem", color: "#7a8fa3", marginTop: "0.15rem" }}>{selectedNode.subject} · {selectedNode.seen_count}× seen</div>
             </div>
           )}
         </div>

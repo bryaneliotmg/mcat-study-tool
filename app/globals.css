@@ -2,11 +2,11 @@
 
 :root {
   --background: #0f1117;
-  --foreground: #e2e8f0;
+  --foreground: #e8edf5;
   --card-bg: #1e2433;
   --card-border: #2d3748;
-  --muted: #4a5568;
-  --muted-fg: #94a3b8;
+  --muted: #64748b;
+  --muted-fg: #b0bec9;
 
   /* Priority colors */
   --critical: #ef4444;
@@ -31,6 +31,10 @@
 
 * {
   box-sizing: border-box;
+}
+
+html {
+  font-size: 106.25%; /* ~17px — scales all rem values up from the 16px default */
 }
 
 html,
@@ -94,7 +98,7 @@ body {
   border-color: #6366f1;
 }
 .input-base::placeholder {
-  color: #4a5568;
+  color: #64748b;
 }
 
 /* Toast */
