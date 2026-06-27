@@ -12,6 +12,7 @@ import {
   Dumbbell,
   GraduationCap,
 } from "lucide-react";
+import ContextualChat from "@/components/ContextualChat";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -160,6 +161,7 @@ export default function RootLayout({
         >
           {children}
         </main>
+        <ContextualChat />
       </body>
     </html>
   );
