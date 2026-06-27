@@ -96,7 +96,7 @@ export default function Dashboard() {
       </div>
 
       {/* ── Stats ── */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.6rem" }}>
+      <div className="dashboard-grid">
         {[
           { label: "Concepts", value: concepts.length, color: "#6366f1", icon: <BookOpen size={14} /> },
           { label: "Critical",  value: critical,        color: "#ef4444", icon: <AlertTriangle size={14} /> },
@@ -113,7 +113,7 @@ export default function Dashboard() {
       </div>
 
       {/* ── Main two-column body ── */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", flex: 1, minHeight: 0, height: 0 }}>
+      <div className="dashboard-body">
 
         {/* Left — Study Queue */}
         <div style={{ background: "#0f1117", border: "1px solid #1a1f2e", borderRadius: "0.75rem", display: "flex", flexDirection: "column", overflow: "hidden" }}>
@@ -144,7 +144,7 @@ export default function Dashboard() {
         </div>
 
         {/* Right — Knowledge Graph */}
-        <div style={{ background: "#080b12", border: "1px solid #1a1f2e", borderRadius: "0.75rem", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+        <div className="graph-panel" style={{ background: "#080b12", border: "1px solid #1a1f2e", borderRadius: "0.75rem", display: "flex", flexDirection: "column", overflow: "hidden" }}>
           <div style={{ padding: "0.85rem 1rem", borderBottom: "1px solid #1a1f2e", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "#7a8fa3", textTransform: "uppercase", letterSpacing: "0.08em" }}>Knowledge Map</span>
             <Link href="/knowledge-graph" style={{ display: "flex", alignItems: "center", gap: "0.3rem", fontSize: "0.65rem", color: "#2d3748", textDecoration: "none", fontWeight: 600 }}>

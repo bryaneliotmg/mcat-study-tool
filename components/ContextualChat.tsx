@@ -124,6 +124,7 @@ export default function ContextualChat() {
         <button
           onClick={() => { setContext(''); setContextLabel(''); setMessages([]); setOpen(true); }}
           title="MCAT Tutor"
+          className="contextual-chat-btn"
           style={{
             position: 'fixed', bottom: '1.5rem', right: '1.5rem', zIndex: 900,
             width: 48, height: 48, borderRadius: '50%',

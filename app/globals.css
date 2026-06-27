@@ -47,6 +47,7 @@ body {
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
     "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 /* Scrollbar */
@@ -99,6 +100,96 @@ body {
 }
 .input-base::placeholder {
   color: #64748b;
+}
+
+/* ── Responsive layout ── */
+.sidebar {
+  display: flex;
+}
+.bottom-nav {
+  display: none;
+}
+.main-content {
+  margin-left: 220px;
+}
+
+@media (max-width: 767px) {
+  html {
+    font-size: 100%; /* revert to 16px on mobile — 106.25% causes overflow */
+  }
+  .sidebar {
+    display: none !important;
+  }
+  .bottom-nav {
+    display: flex !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: #12161f;
+    border-top: 1px solid #2d3748;
+    padding: 0.5rem 0 calc(0.5rem + env(safe-area-inset-bottom));
+    justify-content: space-around;
+    align-items: center;
+  }
+  .main-content {
+    margin-left: 0 !important;
+    padding-bottom: 72px;
+    width: 100vw;
+    max-width: 100vw;
+    overflow-x: hidden;
+    align-items: stretch;
+  }
+  .main-content > * {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden;
+  }
+  /* Push MCAT Tutor button above bottom nav */
+  .contextual-chat-btn {
+    bottom: 80px !important;
+  }
+}
+
+/* ── Dashboard responsive ── */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+}
+.dashboard-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  flex: 1;
+  min-height: 0;
+  height: 0;
+}
+@media (max-width: 767px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.45rem;
+  }
+  .dashboard-body {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: unset;
+    flex: unset;
+    gap: 0.85rem;
+  }
+  .dashboard-body > * {
+    height: auto !important;
+    min-height: unset !important;
+  }
+  .graph-panel {
+    display: none; /* hide graph on mobile — too small to be useful */
+  }
 }
 
 /* Toast */

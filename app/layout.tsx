@@ -38,12 +38,12 @@ function Sidebar() {
 
   return (
     <aside
+      className="sidebar"
       style={{
         width: 220,
         minWidth: 220,
         background: "#12161f",
         borderRight: "1px solid #2d3748",
-        display: "flex",
         flexDirection: "column",
         padding: "1.5rem 0",
         position: "fixed",
@@ -144,23 +144,47 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pathname = usePathname();
+
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </head>
       <body style={{ display: "flex", minHeight: "100vh", background: "#0f1117" }}>
         <Sidebar />
         <main
+          className="main-content"
           style={{
             flex: 1,
-            marginLeft: 220,
             height: "100vh",
             overflowY: "auto",
+            overflowX: "hidden",
             background: "#0f1117",
             display: "flex",
             flexDirection: "column",
+            minWidth: 0,
           }}
         >
           {children}
         </main>
+
+        {/* Bottom nav — mobile only */}
+        <nav className="bottom-nav">
+          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+            const active = pathname === href;
+            return (
+              <Link key={href} href={href} style={{
+                display: "flex", flexDirection: "column", alignItems: "center", gap: "0.25rem",
+                color: active ? "#818cf8" : "#64748b", textDecoration: "none", minWidth: 48,
+              }}>
+                <Icon size={20} strokeWidth={active ? 2.2 : 1.8} />
+                <span style={{ fontSize: "0.6rem", fontWeight: active ? 700 : 400 }}>{label.split(" ")[0]}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
         <ContextualChat />
       </body>
     </html>
