@@ -47,6 +47,7 @@ export default function AddQuestionPage() {
   const [myAnswer, setMyAnswer] = useState("");
   const [reasoning, setReasoning] = useState("");
   const [pasteText, setPasteText] = useState("");
+  const [passage, setPassage] = useState("");
   const [extractedConcept, setExtractedConcept] = useState("");
   const [extracting] = useState(false);
   const [dragOver, setDragOver] = useState(false);
@@ -82,6 +83,7 @@ export default function AddQuestionPage() {
         body: JSON.stringify({
           raw_text: rawText,
           subject,
+          passage: passage.trim() || null,
           notes: [
             myAnswer.trim() ? `My answer: ${myAnswer.trim()}` : null,
             reasoning.trim() ? `My reasoning: ${reasoning.trim()}` : null,
@@ -112,7 +114,7 @@ export default function AddQuestionPage() {
 
       // Reset form
       setQuestion(""); setSubject(""); setMyAnswer(""); setReasoning("");
-      setPasteText(""); setExtractedConcept(""); setUploadedFile(null);
+      setPasteText(""); setPassage(""); setExtractedConcept(""); setUploadedFile(null);
       setActiveTab("type");
       setShowToast(true);
       setTimeout(() => setShowToast(false), 4000);
@@ -245,6 +247,17 @@ export default function AddQuestionPage() {
               )}
             </div>
           )}
+
+          {/* ── PASSAGE ── always visible, optional ── */}
+          <div>
+            <label style={labelStyle}>
+              Passage <span style={{ color: "#7a8fa3", fontWeight: 400, textTransform: "none", letterSpacing: 0 }}>— optional</span>
+            </label>
+            <textarea className="input-base" rows={5}
+              placeholder="Paste the passage this question is based on. Helps Claude give more accurate concept analysis."
+              value={passage} onChange={e => setPassage(e.target.value)}
+              style={{ resize: "vertical", lineHeight: 1.6 }} />
+          </div>
 
           {/* ── WHAT DID YOU ANSWER? ── always visible ── */}
           <div style={{ borderTop: "1px solid #2d3748", paddingTop: "1.25rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
