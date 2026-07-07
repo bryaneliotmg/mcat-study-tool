@@ -127,7 +127,9 @@ export default function MiniGraph({ concepts }: { concepts: Concept[] }) {
       });
     })();
 
-    return () => { cy?.destroy(); };
+    return () => {
+      try { cy?.destroy(); } catch { /* cytoscape cleanup race with React DOM */ }
+    };
   }, [concepts]);
 
   if (concepts.length === 0) {

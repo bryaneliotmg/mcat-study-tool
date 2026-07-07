@@ -85,10 +85,18 @@ function ConceptRow({ concept, onDelete }: { concept: Concept; onDelete: (id: st
   );
 }
 
+const SUBJECT_COLORS_MAP: Record<Subject, string> = {
+  "B/B": "#22d3ee",
+  "C/B": "#818cf8",
+  "P/S": "#a78bfa",
+  "C/P": "#2dd4bf",
+};
+
 export default function Dashboard() {
   const [concepts, setConcepts] = useState<Concept[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedNode, setSelectedNode] = useState<Concept | null>(null);
+  const [subjectFilter, setSubjectFilter] = useState<Subject | null>(null);
 
   useEffect(() => {
     getConcepts()
@@ -108,6 +116,7 @@ export default function Dashboard() {
     }
   }, []);
 
+  const filtered = subjectFilter ? concepts.filter(c => c.subject === subjectFilter) : concepts;
   const critical = concepts.filter(c => c.priority === "critical").length;
   const totalSeen = concepts.reduce((a, c) => a + c.seen_count, 0);
 
@@ -149,21 +158,35 @@ export default function Dashboard() {
 
         {/* Left — Study Queue */}
         <div style={{ background: "#0f1117", border: "1px solid #1a1f2e", borderRadius: "0.75rem", display: "flex", flexDirection: "column", overflow: "hidden" }}>
-          <div style={{ padding: "0.85rem 1rem", borderBottom: "1px solid #1a1f2e", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "#7a8fa3", textTransform: "uppercase", letterSpacing: "0.08em" }}>Study Queue</span>
-            <span style={{ fontSize: "0.65rem", color: "#2d3748" }}>{concepts.length} concepts · by priority</span>
+          <div style={{ padding: "0.75rem 1rem", borderBottom: "1px solid #1a1f2e", display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "#7a8fa3", textTransform: "uppercase", letterSpacing: "0.08em" }}>Study Queue</span>
+              <span style={{ fontSize: "0.65rem", color: "#4a5568" }}>{filtered.length} of {concepts.length} · by priority</span>
+            </div>
+            <div style={{ display: "flex", gap: "0.35rem", flexWrap: "wrap" }}>
+              {(["B/B", "C/B", "P/S", "C/P"] as Subject[]).map(s => {
+                const active = subjectFilter === s;
+                const color = SUBJECT_COLORS_MAP[s];
+                return (
+                  <button key={s} onClick={() => setSubjectFilter(active ? null : s)}
+                    style={{ padding: "2px 10px", borderRadius: 999, fontSize: "0.7rem", fontWeight: 700, cursor: "pointer", border: `1px solid ${active ? color : "#2d3748"}`, background: active ? `${color}22` : "transparent", color: active ? color : "#4a5568", transition: "all 0.15s" }}>
+                    {s}
+                  </button>
+                );
+              })}
+            </div>
           </div>
           <div style={{ flex: 1, overflowY: "auto", padding: "0 1rem" }}>
             {loading ? (
               <p style={{ color: "#2d3748", fontSize: "0.8rem", padding: "1rem 0" }}>Loading...</p>
-            ) : concepts.length === 0 ? (
+            ) : filtered.length === 0 ? (
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: "0.5rem", padding: "2rem 0" }}>
                 <div style={{ width: 36, height: 36, borderRadius: "50%", border: "1px dashed #1e2433" }} />
-                <span style={{ fontSize: "0.78rem", color: "#2d3748" }}>No concepts yet</span>
-                <Link href="/add-question" style={{ fontSize: "0.75rem", color: "#6366f1", textDecoration: "none", fontWeight: 600 }}>Add your first →</Link>
+                <span style={{ fontSize: "0.78rem", color: "#2d3748" }}>{concepts.length === 0 ? "No concepts yet" : `No ${subjectFilter} concepts`}</span>
+                {concepts.length === 0 && <Link href="/add-question" style={{ fontSize: "0.75rem", color: "#6366f1", textDecoration: "none", fontWeight: 600 }}>Add your first →</Link>}
               </div>
             ) : (
-              concepts.map(c => <ConceptRow key={c.id} concept={c} onDelete={handleDelete} />)
+              filtered.map(c => <ConceptRow key={c.id} concept={c} onDelete={handleDelete} />)
             )}
           </div>
           {concepts.length > 0 && (
@@ -201,7 +224,7 @@ export default function Dashboard() {
           {/* Graph canvas */}
           <div style={{ position: "relative", height: 340 }}>
             <div style={{ position: "absolute", inset: 0 }}>
-              <MiniGraph concepts={concepts} />
+              <MiniGraph concepts={filtered} />
             </div>
           </div>
 
