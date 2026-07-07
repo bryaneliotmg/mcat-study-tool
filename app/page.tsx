@@ -102,8 +102,9 @@ export default function Dashboard() {
     setConcepts(prev => prev.filter(c => c.id !== id));
     try {
       await deleteConcept(id);
-    } catch {
-      getConcepts().then(setConcepts);
+    } catch (err) {
+      console.error('Delete failed:', err);
+      getConcepts().then(setConcepts); // revert on failure
     }
   }, []);
 

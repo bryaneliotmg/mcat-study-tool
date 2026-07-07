@@ -85,6 +85,8 @@ export async function incrementConceptSeen(id: string) {
 }
 
 export async function deleteConcept(id: string) {
+  // Null out any questions referencing this concept to avoid FK violation
+  await supabase.from('questions').update({ concept_id: null }).eq('concept_id', id);
   const { error } = await supabase.from('concepts').delete().eq('id', id);
   if (error) throw error;
 }
