@@ -28,17 +28,42 @@ export default function MiniGraph({ concepts }: { concepts: Concept[] }) {
     (async () => {
       const cytoscape = (await import('cytoscape')).default;
 
+      // Build edges from shared chapter
+      const chapterKey = (ch: string | null) => {
+        if (!ch) return "";
+        const m = ch.match(/Ch\.?\s*\d+/i);
+        return m ? m[0].replace(/\s/, "") : ch.split("·").pop()?.trim().slice(0, 20) ?? "";
+      };
+      const byChapter = new Map<string, typeof concepts>();
+      for (const c of concepts) {
+        const k = chapterKey(c.kaplan_chapter ?? null);
+        if (!k) continue;
+        if (!byChapter.has(k)) byChapter.set(k, []);
+        byChapter.get(k)!.push(c);
+      }
+      const miniEdges: { data: { source: string; target: string } }[] = [];
+      for (const [, group] of byChapter) {
+        for (let i = 0; i < group.length; i++) {
+          for (let j = i + 1; j < group.length; j++) {
+            miniEdges.push({ data: { source: group[i].id, target: group[j].id } });
+          }
+        }
+      }
+
       cy = cytoscape({
         container: containerRef.current!,
-        elements: concepts.map(c => ({
-          data: {
-            id: c.id,
-            label: c.name,
-            subject: c.subject,
-            priority: c.priority,
-            seen: c.seen_count,
-          },
-        })),
+        elements: [
+          ...concepts.map(c => ({
+            data: {
+              id: c.id,
+              label: c.name,
+              subject: c.subject,
+              priority: c.priority,
+              seen: c.seen_count,
+            },
+          })),
+          ...miniEdges,
+        ],
         style: [
           {
             selector: 'node',
@@ -78,21 +103,21 @@ export default function MiniGraph({ concepts }: { concepts: Concept[] }) {
           {
             selector: 'edge',
             style: {
-              width: 0.75,
-              'line-color': '#151a26',
+              width: 1,
+              'line-color': '#2d4060',
               'target-arrow-shape': 'none',
               'curve-style': 'haystack',
-              opacity: 0.5,
+              opacity: 0.7,
             } as cytoscape.Css.Edge,
           },
         ],
         layout: {
-          name: 'grid',
+          name: 'cose',
           animate: false,
           fit: true,
-          padding: 48,
-          avoidOverlap: true,
-          avoidOverlapPadding: 20,
+          padding: 32,
+          nodeRepulsion: () => 3000,
+          idealEdgeLength: () => 60,
         } as cytoscape.LayoutOptions,
         userZoomingEnabled: true,
         userPanningEnabled: true,

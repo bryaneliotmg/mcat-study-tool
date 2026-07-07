@@ -107,6 +107,26 @@ Analyze this question and output ONLY this JSON. For kaplan_book and kaplan_chap
       concept = created;
     }
 
+    // Auto-link to other concepts in the same Kaplan chapter
+    if (concept?.id && analysis.kaplan_chapter) {
+      const chapterKey = analysis.kaplan_chapter.split(':')[0].trim(); // e.g. "Ch.3"
+      const { data: siblings } = await supabase
+        .from('concepts')
+        .select('id, kaplan_chapter')
+        .ilike('kaplan_chapter', `%${chapterKey}%`)
+        .neq('id', concept.id);
+
+      if (siblings && siblings.length > 0) {
+        const relLabel = analysis.kaplan_chapter;
+        const rels = siblings.flatMap(s => [
+          { source_concept_id: concept!.id, target_concept_id: s.id, relationship_label: relLabel },
+          { source_concept_id: s.id, target_concept_id: concept!.id, relationship_label: relLabel },
+        ]);
+        // Upsert — ignore duplicates
+        await supabase.from('concept_relationships').upsert(rels, { onConflict: 'source_concept_id,target_concept_id', ignoreDuplicates: true });
+      }
+    }
+
     const { data: question } = await supabase
       .from('questions')
       .insert({
