@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { AlertTriangle, Clock, ChevronRight, Zap, BookOpen, BarChart2, Network } from "lucide-react";
-import { getConcepts } from "@/lib/db";
+import { AlertTriangle, Clock, ChevronRight, Zap, BookOpen, BarChart2, Network, Trash2 } from "lucide-react";
+import { getConcepts, deleteConcept } from "@/lib/db";
 import type { Concept, Priority, Subject } from "@/lib/db";
 
 const MiniGraph = dynamic(() => import("./components/MiniGraph"), { ssr: false });
@@ -29,14 +29,20 @@ function freqLabel(seen: number) {
   return `${seen}× · Quick`;
 }
 
-function ConceptRow({ concept }: { concept: Concept }) {
+function ConceptRow({ concept, onDelete }: { concept: Concept; onDelete: (id: string) => void }) {
   const pm = PRIORITY_META[concept.priority];
   const sm = SUBJECT_META[concept.subject];
+  const [hovered, setHovered] = useState(false);
   return (
-    <div style={{
-      display: "flex", alignItems: "flex-start", gap: "0.75rem",
-      padding: "0.85rem 0", borderBottom: "1px solid #151a26",
-    }}>
+    <div
+      style={{
+        display: "flex", alignItems: "flex-start", gap: "0.75rem",
+        padding: "0.85rem 0", borderBottom: "1px solid #151a26",
+        position: "relative",
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
       {/* Priority dot */}
       <div style={{ width: 7, height: 7, borderRadius: "50%", background: pm.color, flexShrink: 0, marginTop: 6 }} />
 
@@ -60,6 +66,21 @@ function ConceptRow({ concept }: { concept: Concept }) {
         </span>
         <span style={{ fontSize: "0.65rem", color: "#8899aa", fontWeight: 500 }}>{freqLabel(concept.seen_count)}</span>
       </div>
+
+      {hovered && (
+        <button
+          onClick={() => onDelete(concept.id)}
+          title="Delete concept"
+          style={{
+            position: "absolute", top: "50%", right: 0, transform: "translateY(-50%)",
+            background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.3)",
+            borderRadius: "0.35rem", padding: "3px 6px", cursor: "pointer",
+            color: "#ef4444", display: "flex", alignItems: "center",
+          }}
+        >
+          <Trash2 size={13} />
+        </button>
+      )}
     </div>
   );
 }
@@ -74,6 +95,16 @@ export default function Dashboard() {
       .then(setConcepts)
       .catch(console.error)
       .finally(() => setLoading(false));
+  }, []);
+
+  const handleDelete = useCallback(async (id: string) => {
+    if (!confirm('Delete this concept?')) return;
+    setConcepts(prev => prev.filter(c => c.id !== id));
+    try {
+      await deleteConcept(id);
+    } catch {
+      getConcepts().then(setConcepts);
+    }
   }, []);
 
   const critical = concepts.filter(c => c.priority === "critical").length;
@@ -131,7 +162,7 @@ export default function Dashboard() {
                 <Link href="/add-question" style={{ fontSize: "0.75rem", color: "#6366f1", textDecoration: "none", fontWeight: 600 }}>Add your first →</Link>
               </div>
             ) : (
-              concepts.map(c => <ConceptRow key={c.id} concept={c} />)
+              concepts.map(c => <ConceptRow key={c.id} concept={c} onDelete={handleDelete} />)
             )}
           </div>
           {concepts.length > 0 && (

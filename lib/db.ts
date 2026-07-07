@@ -84,6 +84,11 @@ export async function incrementConceptSeen(id: string) {
   return data;
 }
 
+export async function deleteConcept(id: string) {
+  const { error } = await supabase.from('concepts').delete().eq('id', id);
+  if (error) throw error;
+}
+
 export async function markConceptMastered(id: string) {
   const { error } = await supabase
     .from('concepts')
