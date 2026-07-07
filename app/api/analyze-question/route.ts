@@ -70,6 +70,9 @@ Analyze this question and output ONLY this JSON. For kaplan_book and kaplan_chap
       .eq('subject', subject)
       .maybeSingle();
 
+    // Always store chapter with book prefix for consistent matching
+    const fullChapter = `${analysis.kaplan_book ? analysis.kaplan_book + ' · ' : ''}${analysis.kaplan_chapter ?? ''}`;
+
     let concept;
     if (existing) {
       const newCount = existing.seen_count + 1;
@@ -82,8 +85,9 @@ Analyze this question and output ONLY this JSON. For kaplan_book and kaplan_chap
           seen_count: newCount,
           priority,
           gap_analysis: analysis.gap_analysis,
-          kaplan_chapter: analysis.kaplan_chapter,
+          kaplan_chapter: fullChapter,
           kaplan_section: analysis.kaplan_section,
+          aamc_category: analysis.aamc_category,
         })
         .eq('id', existing.id)
         .select()
@@ -97,9 +101,10 @@ Analyze this question and output ONLY this JSON. For kaplan_book and kaplan_chap
           subject,
           seen_count: 1,
           priority: analysis.priority,
-          kaplan_chapter: `${analysis.kaplan_book ? analysis.kaplan_book + ' · ' : ''}${analysis.kaplan_chapter ?? ''}`,
+          kaplan_chapter: fullChapter,
           kaplan_section: analysis.kaplan_section,
           gap_analysis: analysis.gap_analysis,
+          aamc_category: analysis.aamc_category,
           is_mastered: false,
         })
         .select()
@@ -107,23 +112,46 @@ Analyze this question and output ONLY this JSON. For kaplan_book and kaplan_chap
       concept = created;
     }
 
-    // Auto-link to other concepts in the same Kaplan chapter
-    if (concept?.id && analysis.kaplan_chapter) {
-      const chapterKey = analysis.kaplan_chapter.split(':')[0].trim(); // e.g. "Ch.3"
-      const { data: siblings } = await supabase
-        .from('concepts')
-        .select('id, kaplan_chapter')
-        .ilike('kaplan_chapter', `%${chapterKey}%`)
-        .neq('id', concept.id);
+    // ── Auto-link to related concepts ──────────────────────────────────────
+    if (concept?.id) {
+      const toLink: { id: string; label: string }[] = [];
 
-      if (siblings && siblings.length > 0) {
-        const relLabel = analysis.kaplan_chapter;
-        const rels = siblings.flatMap(s => [
-          { source_concept_id: concept!.id, target_concept_id: s.id, relationship_label: relLabel },
-          { source_concept_id: s.id, target_concept_id: concept!.id, relationship_label: relLabel },
+      // 1. Same Kaplan chapter — use "Ch.N:" pattern to avoid partial matches
+      if (analysis.kaplan_chapter) {
+        const chKey = analysis.kaplan_chapter.split(':')[0].trim() + ':'; // "Ch.3:"
+        const { data: chapterSiblings } = await supabase
+          .from('concepts')
+          .select('id')
+          .ilike('kaplan_chapter', `%${chKey}%`)
+          .neq('id', concept.id);
+        for (const s of chapterSiblings ?? []) {
+          toLink.push({ id: s.id, label: analysis.kaplan_chapter });
+        }
+      }
+
+      // 2. Same AAMC category (e.g. "1A") — broader conceptual grouping
+      if (analysis.aamc_category) {
+        const { data: categorySiblings } = await supabase
+          .from('concepts')
+          .select('id')
+          .eq('aamc_category', analysis.aamc_category)
+          .neq('id', concept.id);
+        for (const s of categorySiblings ?? []) {
+          if (!toLink.find(x => x.id === s.id)) {
+            toLink.push({ id: s.id, label: `AAMC ${analysis.aamc_category}` });
+          }
+        }
+      }
+
+      if (toLink.length > 0) {
+        const rels = toLink.flatMap(s => [
+          { source_concept_id: concept!.id, target_concept_id: s.id, relationship_label: s.label },
+          { source_concept_id: s.id, target_concept_id: concept!.id, relationship_label: s.label },
         ]);
-        // Upsert — ignore duplicates
-        await supabase.from('concept_relationships').upsert(rels, { onConflict: 'source_concept_id,target_concept_id', ignoreDuplicates: true });
+        // Insert individually to tolerate duplicates gracefully
+        for (const rel of rels) {
+          await supabase.from('concept_relationships').upsert(rel, { onConflict: 'source_concept_id,target_concept_id', ignoreDuplicates: true });
+        }
       }
     }
 
