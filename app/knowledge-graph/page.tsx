@@ -22,8 +22,12 @@ const ALL_SUBJECTS: Subject[] = ["B/B", "C/B", "P/S", "C/P"];
 
 function chapterKey(chapter: string | null): string {
   if (!chapter) return "";
+  // Include book prefix so "Biology Ch.2" and "Chemistry Ch.2" don't collide
+  const parts = chapter.split("·");
+  const book = parts.length > 1 ? parts[0].trim() : "";
   const m = chapter.match(/Ch\.?\s*\d+/i);
-  return m ? m[0].replace(/\s/, "") : chapter.split("·").pop()?.trim().slice(0, 20) ?? "";
+  const ch = m ? m[0].replace(/\s/, "") : parts[parts.length - 1].trim().slice(0, 20);
+  return book ? `${book}|${ch}` : ch;
 }
 
 function edgeLabel(chapter: string | null): string {

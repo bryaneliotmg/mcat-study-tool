@@ -19,8 +19,11 @@ const PRIORITY_GLOW: Record<string, string> = {
 
 function chapterKey(ch: string | null): string {
   if (!ch) return '';
+  const parts = ch.split('·');
+  const book = parts.length > 1 ? parts[0].trim() : '';
   const m = ch.match(/Ch\.?\s*\d+/i);
-  return m ? m[0].replace(/\s/, '') : ch.split('·').pop()?.trim().slice(0, 20) ?? '';
+  const chNum = m ? m[0].replace(/\s/, '') : parts[parts.length - 1].trim().slice(0, 20);
+  return book ? `${book}|${chNum}` : chNum;
 }
 
 export default function MiniGraph({ concepts }: { concepts: Concept[] }) {

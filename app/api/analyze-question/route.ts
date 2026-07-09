@@ -116,9 +116,9 @@ Analyze this question and output ONLY this JSON. For kaplan_book and kaplan_chap
     if (concept?.id) {
       const toLink: { id: string; label: string }[] = [];
 
-      // 1. Same Kaplan chapter — use "Ch.N:" pattern to avoid partial matches
-      if (analysis.kaplan_chapter) {
-        const chKey = analysis.kaplan_chapter.split(':')[0].trim() + ':'; // "Ch.3:"
+      // 1. Same book + chapter — include book prefix to avoid cross-book Ch.N collisions
+      if (analysis.kaplan_chapter && analysis.kaplan_book) {
+        const chKey = `${analysis.kaplan_book} · ${analysis.kaplan_chapter.split(':')[0].trim()}:`;
         const { data: chapterSiblings } = await supabase
           .from('concepts')
           .select('id')
