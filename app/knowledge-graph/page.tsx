@@ -271,6 +271,8 @@ export default function KnowledgeGraphPage() {
       fg.d3ReheatSimulation();
 
       graphRef.current = fg;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (window as any).__fg = fg;
     })();
 
     return () => {
@@ -348,9 +350,9 @@ export default function KnowledgeGraphPage() {
       {/* Graph canvas */}
       <div ref={containerRef} style={{ flex: 1, position: "relative" }} />
 
-      {/* Right detail panel */}
+      {/* Right detail panel — fixed overlay so canvas width is unaffected */}
       {selected && (
-        <aside style={{ width: 240, background: "#0d1117", borderLeft: "1px solid #1e2433", padding: "1.25rem 1rem", overflowY: "auto", flexShrink: 0 }}>
+        <aside style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: 260, background: "#0d1117", borderLeft: "1px solid #1e2433", padding: "1.25rem 1rem", overflowY: "auto", zIndex: 50 }}>
           {/* Subject accent bar */}
           <div style={{ width: "100%", height: 3, background: SUBJECT_COLORS[selected.subject], borderRadius: 2, marginBottom: "1rem", boxShadow: `0 0 8px ${SUBJECT_COLORS[selected.subject]}88` }} />
 
