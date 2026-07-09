@@ -63,7 +63,6 @@ export default function KnowledgeGraphPage() {
   const [hovered, setHovered] = useState<Concept | null>(null);
   const selectedRef = useRef<Concept | null>(null);
   const hoveredRef = useRef<Concept | null>(null);
-  const justClickedNodeRef = useRef(false);
   const [enabledSubjects, setEnabledSubjects] = useState<Set<Subject>>(new Set(ALL_SUBJECTS));
   const [concepts, setConcepts] = useState<Concept[]>([]);
   const [dbEdges, setDbEdges] = useState<{ source: string; target: string; label: string }[]>([]);
@@ -247,22 +246,7 @@ export default function KnowledgeGraphPage() {
         })
         .linkCanvasObjectMode(() => "replace")
 
-        // Interactions
-        .nodePointerAreaPaint((node: object, color: string, ctx: CanvasRenderingContext2D) => {
-          const n = node as GraphNode;
-          const r = Math.max(3, Math.sqrt(n.seen) * 4) + 4;
-          ctx.beginPath();
-          ctx.arc(n.x ?? 0, n.y ?? 0, r, 0, 2 * Math.PI);
-          ctx.fillStyle = color;
-          ctx.fill();
-        })
-        .onNodeClick((node: object) => {
-          justClickedNodeRef.current = true;
-          const n = node as GraphNode;
-          const next = selectedRef.current?.id === n.id ? null : n.concept;
-          selectedRef.current = next;
-          setSelected(next);
-        })
+        // Hover cursor only — clicks handled manually below
         .onNodeHover((node: object | null) => {
           const c = node ? (node as GraphNode).concept : null;
           hoveredRef.current = c;
@@ -270,11 +254,6 @@ export default function KnowledgeGraphPage() {
           if (containerRef.current) {
             containerRef.current.style.cursor = node ? "pointer" : "default";
           }
-        })
-        .onBackgroundClick(() => {
-          if (justClickedNodeRef.current) { justClickedNodeRef.current = false; return; }
-          selectedRef.current = null;
-          setSelected(null);
         })
 
         // Physics tuning
@@ -287,11 +266,43 @@ export default function KnowledgeGraphPage() {
       fg.d3ReheatSimulation();
 
       graphRef.current = fg;
+
+      // Manual click handler — bypasses force-graph event issues
+      const canvas = containerRef.current?.querySelector('canvas') as HTMLCanvasElement | null;
+      const handleClick = (e: MouseEvent) => {
+        if (!fg || cancelled) return;
+        const rect = (e.target as HTMLCanvasElement).getBoundingClientRect();
+        const sx = e.clientX - rect.left;
+        const sy = e.clientY - rect.top;
+        // Convert screen → graph coords
+        const gCoords = fg.screen2GraphCoords(sx, sy);
+        const nodes: GraphNode[] = fg.graphData().nodes;
+        let hit: GraphNode | null = null;
+        let minDist = Infinity;
+        for (const n of nodes) {
+          const r = Math.max(3, Math.sqrt(n.seen) * 4) + 6;
+          const dx = (n.x ?? 0) - gCoords.x;
+          const dy = (n.y ?? 0) - gCoords.y;
+          const d = Math.sqrt(dx * dx + dy * dy);
+          if (d < r && d < minDist) { minDist = d; hit = n; }
+        }
+        const next = hit ? (selectedRef.current?.id === hit.id ? null : hit.concept) : null;
+        selectedRef.current = next;
+        setSelected(next);
+      };
+      canvas?.addEventListener('click', handleClick);
+      // Store cleanup on fg so return() can reach it
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (fg as any)._canvasClickHandler = () => canvas?.removeEventListener('click', handleClick);
     })();
 
     return () => {
       cancelled = true;
-      try { fg?._destructor?.(); } catch {}
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (graphRef.current as any)?._canvasClickHandler?.();
+        fg?._destructor?.();
+      } catch {}
       if (graphRef.current === fg) graphRef.current = null;
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
