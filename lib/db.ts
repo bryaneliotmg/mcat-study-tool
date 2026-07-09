@@ -85,8 +85,12 @@ export async function incrementConceptSeen(id: string) {
 }
 
 export async function deleteConcept(id: string) {
-  // Remove all FK references before deleting
+  // Null or delete all FK references before deleting the concept
   await supabase.from('questions').update({ concept_id: null }).eq('concept_id', id);
+  await supabase.from('responses').update({ concept_id: null }).eq('concept_id', id);
+  await supabase.from('passages').update({ concept_id: null }).eq('concept_id', id);
+  await supabase.from('spaced_repetition_queue').delete().eq('concept_id', id);
+  await supabase.from('error_log').delete().eq('concept_id', id);
   await supabase.from('concept_relationships').delete().eq('source_concept_id', id);
   await supabase.from('concept_relationships').delete().eq('target_concept_id', id);
   const { error } = await supabase.from('concepts').delete().eq('id', id);
