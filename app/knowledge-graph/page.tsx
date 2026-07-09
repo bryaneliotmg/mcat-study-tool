@@ -63,6 +63,7 @@ export default function KnowledgeGraphPage() {
   const [hovered, setHovered] = useState<Concept | null>(null);
   const selectedRef = useRef<Concept | null>(null);
   const hoveredRef = useRef<Concept | null>(null);
+  const justClickedNodeRef = useRef(false);
   const [enabledSubjects, setEnabledSubjects] = useState<Set<Subject>>(new Set(ALL_SUBJECTS));
   const [concepts, setConcepts] = useState<Concept[]>([]);
   const [dbEdges, setDbEdges] = useState<{ source: string; target: string; label: string }[]>([]);
@@ -247,7 +248,16 @@ export default function KnowledgeGraphPage() {
         .linkCanvasObjectMode(() => "replace")
 
         // Interactions
+        .nodePointerAreaPaint((node: object, color: string, ctx: CanvasRenderingContext2D) => {
+          const n = node as GraphNode;
+          const r = Math.max(3, Math.sqrt(n.seen) * 4) + 4;
+          ctx.beginPath();
+          ctx.arc(n.x ?? 0, n.y ?? 0, r, 0, 2 * Math.PI);
+          ctx.fillStyle = color;
+          ctx.fill();
+        })
         .onNodeClick((node: object) => {
+          justClickedNodeRef.current = true;
           const n = node as GraphNode;
           const next = selectedRef.current?.id === n.id ? null : n.concept;
           selectedRef.current = next;
@@ -262,6 +272,7 @@ export default function KnowledgeGraphPage() {
           }
         })
         .onBackgroundClick(() => {
+          if (justClickedNodeRef.current) { justClickedNodeRef.current = false; return; }
           selectedRef.current = null;
           setSelected(null);
         })
