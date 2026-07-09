@@ -246,7 +246,12 @@ export default function KnowledgeGraphPage() {
         })
         .linkCanvasObjectMode(() => "replace")
 
-        // Hover cursor only — clicks handled manually below
+        .onNodeClick((node: object) => {
+          const n = node as GraphNode;
+          const next = selectedRef.current?.id === n.id ? null : n.concept;
+          selectedRef.current = next;
+          setSelected(next);
+        })
         .onNodeHover((node: object | null) => {
           const c = node ? (node as GraphNode).concept : null;
           hoveredRef.current = c;
@@ -255,54 +260,22 @@ export default function KnowledgeGraphPage() {
             containerRef.current.style.cursor = node ? "pointer" : "default";
           }
         })
+        // No onBackgroundClick — panel stays open until Dismiss is clicked
 
         // Physics tuning
         .d3AlphaDecay(0.02)
         .d3VelocityDecay(0.3);
 
-      // Tune built-in forces (d3 is bundled inside force-graph)
       fg.d3Force("charge")?.strength(-150).distanceMax(250);
       fg.d3Force("link")?.distance(90).strength(0.5);
       fg.d3ReheatSimulation();
 
       graphRef.current = fg;
-
-      // Manual click handler — bypasses force-graph event issues
-      const canvas = containerRef.current?.querySelector('canvas') as HTMLCanvasElement | null;
-      const handleClick = (e: MouseEvent) => {
-        if (!fg || cancelled) return;
-        const rect = (e.target as HTMLCanvasElement).getBoundingClientRect();
-        const sx = e.clientX - rect.left;
-        const sy = e.clientY - rect.top;
-        // Convert screen → graph coords
-        const gCoords = fg.screen2GraphCoords(sx, sy);
-        const nodes: GraphNode[] = fg.graphData().nodes;
-        let hit: GraphNode | null = null;
-        let minDist = Infinity;
-        for (const n of nodes) {
-          const r = Math.max(3, Math.sqrt(n.seen) * 4) + 6;
-          const dx = (n.x ?? 0) - gCoords.x;
-          const dy = (n.y ?? 0) - gCoords.y;
-          const d = Math.sqrt(dx * dx + dy * dy);
-          if (d < r && d < minDist) { minDist = d; hit = n; }
-        }
-        const next = hit ? (selectedRef.current?.id === hit.id ? null : hit.concept) : null;
-        selectedRef.current = next;
-        setSelected(next);
-      };
-      canvas?.addEventListener('click', handleClick);
-      // Store cleanup on fg so return() can reach it
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (fg as any)._canvasClickHandler = () => canvas?.removeEventListener('click', handleClick);
     })();
 
     return () => {
       cancelled = true;
-      try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (graphRef.current as any)?._canvasClickHandler?.();
-        fg?._destructor?.();
-      } catch {}
+      try { fg?._destructor?.(); } catch {}
       if (graphRef.current === fg) graphRef.current = null;
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
