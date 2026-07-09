@@ -69,8 +69,6 @@ export default function MiniGraph({ concepts }: { concepts: Concept[] }) {
 
       fg = ForceGraph()(containerRef.current)
         .backgroundColor('#080b12')
-        .width(containerRef.current.clientWidth)
-        .height(containerRef.current.clientHeight)
         .graphData({ nodes, links: edges })
         .nodeCanvasObject((node: { id: string; name: string; subject: string; priority: string; seen: number; x?: number; y?: number }, ctx: CanvasRenderingContext2D, globalScale: number) => {
           const x = node.x ?? 0;
@@ -127,17 +125,33 @@ export default function MiniGraph({ concepts }: { concepts: Concept[] }) {
           ctx.lineWidth = 0.5;
           ctx.stroke();
         })
-        .d3AlphaDecay(0.03)
-        .d3VelocityDecay(0.4)
+        .d3AlphaDecay(0.04)
+        .d3VelocityDecay(0.5)
         .enableZoomInteraction(true)
-        .enablePanInteraction(true);
+        .enablePanInteraction(true)
+        .onEngineStop(() => fg?.zoomToFit(300, 32));
+
+      // Fallback: fit after simulation should have settled
+      setTimeout(() => fg?.zoomToFit(300, 32), 1500);
 
       fg.d3Force('charge')?.strength(-60).distanceMax(150);
       fg.d3Force('link')?.distance(50).strength(0.4);
+
+      // Keep canvas sized to container — fires immediately on observe
+      const ro = new ResizeObserver(([entry]) => {
+        const { width: w, height: h } = entry.contentRect;
+        if (w > 0 && h > 0) fg?.width(w).height(h);
+      });
+      if (containerRef.current) ro.observe(containerRef.current);
+      (fg as { _ro?: ResizeObserver })._ro = ro;
     })();
 
     return () => {
-      try { fg?._destructor?.(); } catch { /* ignore */ }
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (fg as any)?._ro?.disconnect();
+        fg?._destructor?.();
+      } catch { /* ignore */ }
     };
   }, [concepts]);
 
