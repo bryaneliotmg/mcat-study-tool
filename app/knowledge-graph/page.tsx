@@ -61,6 +61,8 @@ export default function KnowledgeGraphPage() {
 
   const [selected, setSelected] = useState<Concept | null>(null);
   const [hovered, setHovered] = useState<Concept | null>(null);
+  const selectedRef = useRef<Concept | null>(null);
+  const hoveredRef = useRef<Concept | null>(null);
   const [enabledSubjects, setEnabledSubjects] = useState<Set<Subject>>(new Set(ALL_SUBJECTS));
   const [concepts, setConcepts] = useState<Concept[]>([]);
   const [dbEdges, setDbEdges] = useState<{ source: string; target: string; label: string }[]>([]);
@@ -168,8 +170,8 @@ export default function KnowledgeGraphPage() {
           const x = n.x ?? 0;
           const y = n.y ?? 0;
           const r = Math.max(3, Math.sqrt(n.seen) * 4);
-          const isSelected = selected?.id === n.id;
-          const isHovered = hovered?.id === n.id;
+          const isSelected = selectedRef.current?.id === n.id;
+          const isHovered = hoveredRef.current?.id === n.id;
           const color = SUBJECT_COLORS[n.subject] ?? "#6366f1";
           const glowColor = PRIORITY_GLOW[n.priority];
 
@@ -247,15 +249,22 @@ export default function KnowledgeGraphPage() {
         // Interactions
         .onNodeClick((node: object) => {
           const n = node as GraphNode;
-          setSelected(prev => prev?.id === n.id ? null : n.concept);
+          const next = selectedRef.current?.id === n.id ? null : n.concept;
+          selectedRef.current = next;
+          setSelected(next);
         })
         .onNodeHover((node: object | null) => {
-          setHovered(node ? (node as GraphNode).concept : null);
+          const c = node ? (node as GraphNode).concept : null;
+          hoveredRef.current = c;
+          setHovered(c);
           if (containerRef.current) {
             containerRef.current.style.cursor = node ? "pointer" : "default";
           }
         })
-        .onBackgroundClick(() => setSelected(null))
+        .onBackgroundClick(() => {
+          selectedRef.current = null;
+          setSelected(null);
+        })
 
         // Physics tuning
         .d3AlphaDecay(0.02)
@@ -282,51 +291,6 @@ export default function KnowledgeGraphPage() {
     graphRef.current?.width(dimensions.w).height(dimensions.h);
   }, [dimensions]);
 
-  // Update selection highlight without full reinit
-  useEffect(() => {
-    graphRef.current?.nodeCanvasObject((node: object, ctx: CanvasRenderingContext2D, globalScale: number) => {
-      const n = node as GraphNode;
-      const x = n.x ?? 0;
-      const y = n.y ?? 0;
-      const r = Math.max(3, Math.sqrt(n.seen) * 4);
-      const isSelected = selected?.id === n.id;
-      const isHovered = hovered?.id === n.id;
-      const color = SUBJECT_COLORS[n.subject] ?? "#6366f1";
-      const glowColor = PRIORITY_GLOW[n.priority];
-
-      if (n.priority === "critical" || n.priority === "high") {
-        ctx.beginPath();
-        ctx.arc(x, y, r + 3, 0, 2 * Math.PI);
-        ctx.fillStyle = glowColor + "33";
-        ctx.fill();
-      }
-
-      if (isSelected || isHovered) {
-        ctx.beginPath();
-        ctx.arc(x, y, r + 5, 0, 2 * Math.PI);
-        ctx.fillStyle = color + "44";
-        ctx.fill();
-      }
-
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, 2 * Math.PI);
-      ctx.fillStyle = isSelected || isHovered ? color : color + "bb";
-      ctx.fill();
-
-      ctx.beginPath();
-      ctx.arc(x - r * 0.25, y - r * 0.25, r * 0.35, 0, 2 * Math.PI);
-      ctx.fillStyle = "rgba(255,255,255,0.18)";
-      ctx.fill();
-
-      const label = n.name.length > 22 ? n.name.slice(0, 22) + "…" : n.name;
-      const fontSize = Math.max(10, 12 / globalScale);
-      ctx.font = `${isSelected || isHovered ? "700" : "400"} ${fontSize}px Inter, sans-serif`;
-      ctx.fillStyle = isSelected || isHovered ? "#e2e8f0" : `rgba(148,163,184,${Math.min(1, globalScale * 0.7 + 0.2)})`;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(label, x, y + r + fontSize * 0.9);
-    });
-  }, [selected, hovered]);
 
   function toggleSubject(s: Subject) {
     setEnabledSubjects(prev => {
