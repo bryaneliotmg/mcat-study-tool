@@ -73,45 +73,42 @@ export default function MiniGraph({ concepts }: { concepts: Concept[] }) {
         .height(containerRef.current.clientHeight)
         .graphData({ nodes, links: edges })
         .nodeCanvasObject((node: { id: string; name: string; subject: string; priority: string; seen: number; x?: number; y?: number }, ctx: CanvasRenderingContext2D, globalScale: number) => {
-          const r = Math.max(4, Math.min(10, 4 + (node.seen ?? 0) * 1.2));
           const x = node.x ?? 0;
           const y = node.y ?? 0;
-          const color = SUBJECT_COLORS[node.subject] ?? '#8899aa';
-          const glowColor = PRIORITY_GLOW[node.priority] ?? '#1e2433';
+          const r = Math.max(3, Math.sqrt(node.seen ?? 1) * 4);
+          const color = SUBJECT_COLORS[node.subject] ?? '#6366f1';
+          const glowColor = PRIORITY_GLOW[node.priority] ?? '#8899aa';
 
-          // Glow
-          const grd = ctx.createRadialGradient(x, y, r * 0.5, x, y, r * 2.5);
-          grd.addColorStop(0, color + '55');
-          grd.addColorStop(1, 'transparent');
-          ctx.beginPath();
-          ctx.arc(x, y, r * 2.5, 0, 2 * Math.PI);
-          ctx.fillStyle = grd;
-          ctx.fill();
-
-          // Priority ring
+          // Outer glow ring for priority
           if (node.priority === 'critical' || node.priority === 'high') {
             ctx.beginPath();
-            ctx.arc(x, y, r + 1.5, 0, 2 * Math.PI);
-            ctx.strokeStyle = glowColor + 'aa';
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
+            ctx.arc(x, y, r + 3, 0, 2 * Math.PI);
+            ctx.fillStyle = glowColor + '33';
+            ctx.fill();
           }
 
-          // Core
+          // Core node
           ctx.beginPath();
           ctx.arc(x, y, r, 0, 2 * Math.PI);
-          ctx.fillStyle = color;
+          ctx.fillStyle = color + 'bb';
           ctx.fill();
 
-          // Label at higher zoom
-          if (globalScale > 1.5) {
-            const label = node.name.length > 18 ? node.name.slice(0, 16) + '…' : node.name;
-            ctx.font = `${5 / globalScale}px Inter, sans-serif`;
-            ctx.fillStyle = '#94a3b8';
-            ctx.textAlign = 'center';
-            ctx.fillText(label, x, y + r + 4 / globalScale);
-          }
+          // Inner highlight
+          ctx.beginPath();
+          ctx.arc(x - r * 0.25, y - r * 0.25, r * 0.35, 0, 2 * Math.PI);
+          ctx.fillStyle = 'rgba(255,255,255,0.18)';
+          ctx.fill();
+
+          // Label
+          const label = node.name.length > 22 ? node.name.slice(0, 22) + '…' : node.name;
+          const fontSize = Math.max(10, 12 / globalScale);
+          ctx.font = `400 ${fontSize}px Inter, sans-serif`;
+          ctx.fillStyle = `rgba(148,163,184,${Math.min(1, globalScale * 0.7 + 0.2)})`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(label, x, y + r + fontSize * 0.9);
         })
+        .nodeCanvasObjectMode(() => 'replace')
         .nodePointerAreaPaint((node: { x?: number; y?: number; seen?: number }, color: string, ctx: CanvasRenderingContext2D) => {
           const r = Math.max(4, Math.min(10, 4 + (node.seen ?? 0) * 1.2));
           ctx.beginPath();
